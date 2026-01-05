@@ -7,14 +7,14 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-class AppBootstrap extends Command
+class AppInit extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'app:app-bootstrap';
+    protected $signature = 'app:init';
 
     /**
      * The console command description.
@@ -54,14 +54,9 @@ class AppBootstrap extends Command
             $enviroment = 'production';
         }
 
-        // $name = mb_strtolower($this->getProjectName());
-
+        // 5) Generar APP_KEY (no depende de DB)
         $this->callSilent('key:generate', ['--force' => true]);
-        $this->callSilent('optimize:clear');
 
-        //$file = file_get_contents(config_path('database.php'));
-        //$file = str_replace('template-laravel', $name, $file);
-        //file_put_contents(config_path('database.php'), $file);
 
         if ($enviroment == 'replica') {
             /* Obtenemos el nombre del proyecto por al nombre de rootPath */
@@ -130,8 +125,6 @@ class AppBootstrap extends Command
             $secret = Str::random(60);
             $this->setEnv($path, $secret, 'SECRET');
 
-            //$this->showInfo();
-
             return Command::SUCCESS;
         }
 
@@ -166,18 +159,6 @@ class AppBootstrap extends Command
         //Ampliar tiempo de sesion
         $this->setEnv($path, 3600, 'SESSION_LIFETIME');
 
-        $this->call('migrate', ['--force' => true]);
-        $this->call('db:seed', ['--class' => 'Database\\Seeders\\RolesAndPermissionsSeeder', '--force' => true]);
-
-        // por si el cache driver/file quedó raro:
-        $this->callSilent('permission:cache-reset'); // :contentReference[oaicite:16]{index=16}
-        //$this->showInfo();
-        $this->newLine();
-        $this->info('Listo ✅ Endpoints:');
-        $this->line('POST /api/auth/login');
-        $this->line('POST /api/auth/refresh  (requiere Bearer token vigente)');
-        $this->line('POST /api/auth/logout   (requiere Bearer token)');
-        $this->line('GET  /api/auth/me       (requiere Bearer token)');
 
         return self::SUCCESS;
     }
