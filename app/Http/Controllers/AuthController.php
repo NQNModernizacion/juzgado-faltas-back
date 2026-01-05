@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AuthRequest;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -22,44 +24,112 @@ class AuthController extends Controller
         return now()->addMinutes($this->tokenExpirationMinutes())->toISOString();
     }
 
-    public function login(Request $request)
+    public function login(AuthRequest $request)
     {
-        $data = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-            'device_name' => ['nullable', 'string', 'max:255'],
-        ]);
+        try {
+            $data = $request->all();
+            // $data = $request->validate([
+            //     'type' => ['required', 'string'],
+            //     '_id' => ['required', 'string'],
+            //     'password' => ['required', 'string'],
+            //     /* 'email' => ['required', 'email'],
+            //     'password' => ['required', 'string'], */
+            //     'device_name' => ['nullable', 'string', 'max:255'],
+            // ]);
+            switch ($request->type) {
+                case 'internal':
+                    if (is_email($request->_id)) {
+                        // $user = User::where('email', $request->_id)->first();
+                        $user = User::where('email', $data['_id'])->first();
+                    } else {
+                        /* $person = Person::where('documento', $request->_id)->first();
+                        if (!$person) {
+                            throw new AuthException(['general' => 'Usuario no encontrado'], 404);
+                        } else {
+                            $user = User::find($person->usuarioID);
+                        } */
+                        throw new Exception('Usuario no encontrado');
+                    }
+                    // Cuando _id es DNI -- HAY QUE RESOLVERLO CON PERSONA MODEL
+                    break;
 
-        $user = User::where('email', $data['email'])->first();
+                case 'enter_app':
+                    $user = User::find($request->_id);
+                    break;
 
-        if (! $user || ! Hash::check($data['password'], $user->password)) {
-            // Activitylog: podés registrar intento fallido sin causer si querés (opcional)
-            return response()->json(['message' => 'Credenciales inválidas'], 422);
+                case 'refresh_data':
+                case 'refresh_token':
+                case 'app_login':
+                    //validacion de existencia del token
+                    if (
+                        $request->header('Authorization') == null ||
+                        $request->header('Authorization') == 'Bearer undefined' ||
+                        $request->header('Authorization') == 'Bearer null' ||
+                        $request->header('Authorization') == 'Bearer '
+                    ) {
+                        throw new Exception('No se ha proporcionado un token');
+                    }
+                    /* AuthService::checkToken($request->header('Authorization'));
+                    $user = User::find(Auth::id()); */
+                    $user = $request->user();
+                    $token = $user->currentAccessToken(); // token actual autenticado :contentReference[oaicite:9]{index=9}
+                    $token->delete();
+
+                    break;
+
+                default:
+                    //En ningún caso debería llegar hasta acá
+                    // $user = User::find($request->_id);
+                    throw new Exception('Tipo de autenticación no reconocido');
+
+                    break;
+            }
+
+            if (! $user || ! Hash::check($data['password'], $user->password)) {
+                // Activitylog: podés registrar intento fallido sin causer si querés (opcional)
+                return response()->json(['message' => 'Credenciales inválidas'], 422);
+            }
+
+            $deviceName = $data['device_name']
+                ?? substr(($request->userAgent() ?: 'api-device'), 0, 255);
+
+            // Sanctum: createToken() devuelve plainTextToken para devolver al cliente :contentReference[oaicite:7]{index=7}
+            $plain = $user->createToken($deviceName)->plainTextToken;
+
+            // Activitylog: ejemplo de uso con causedBy/withProperties :contentReference[oaicite:8]{index=8}
+            // activity('auth')
+            //     ->causedBy($user)
+            //     ->withProperties(['device_name' => $deviceName, 'ip' => $request->ip()])
+            //     ->log('login');
+            return sendResponse([
+                'token_type' => 'Bearer',
+                'token' => $plain,
+                'expires_at' => $this->expiresAtFromNow(),
+                'user' => [
+                    'id' => $user->id,
+                    'email' => $user->email,
+                    "auth_method" => $request['type'],
+                    'persona' => [],
+                    'roles' => $user->getRoleNames(),
+                    'permissions' => $user->getAllPermissions()->pluck('name'),
+                ],
+            ], null, 200);
+            // return response()->json([
+            //     'token_type' => 'Bearer',
+            //     'access_token' => $plain,
+            //     'expires_at' => $this->expiresAtFromNow(),
+            //     'user' => [
+            //         'id' => $user->id,
+            //         'email' => $user->email,
+            //         'roles' => $user->getRoleNames(),
+            //         'permissions' => $user->getAllPermissions()->pluck('name'),
+            //     ],
+            // ]);
+        } catch (\Throwable $th) {
+            //throw $th;
+            $log = saveLog($th, 'error', __FUNCTION__);
+            return sendResponse(null, $log, 490);
         }
-
-        $deviceName = $data['device_name']
-            ?? substr(($request->userAgent() ?: 'api-device'), 0, 255);
-
-        // Sanctum: createToken() devuelve plainTextToken para devolver al cliente :contentReference[oaicite:7]{index=7}
-        $plain = $user->createToken($deviceName)->plainTextToken;
-
-        // Activitylog: ejemplo de uso con causedBy/withProperties :contentReference[oaicite:8]{index=8}
-        activity('auth')
-            ->causedBy($user)
-            ->withProperties(['device_name' => $deviceName, 'ip' => $request->ip()])
-            ->log('login');
-
-        return response()->json([
-            'token_type' => 'Bearer',
-            'access_token' => $plain,
-            'expires_at' => $this->expiresAtFromNow(),
-            'user' => [
-                'id' => $user->id,
-                'email' => $user->email,
-                'roles' => $user->getRoleNames(),
-                'permissions' => $user->getAllPermissions()->pluck('name'),
-            ],
-        ]);
     }
 
     public function me(Request $request)
