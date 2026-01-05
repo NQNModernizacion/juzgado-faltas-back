@@ -18,18 +18,19 @@ class RolesSeeder extends Seeder
         //
         $this->command?->call('permission:cache-reset');
 
+        $guard = 'sanctum';
 
-        Permission::create(['guard_name' => 'sanctum', 'name' => 'admin.permission.view', 'description' => 'Puede ver permisos']);
-        Permission::create(['guard_name' => 'sanctum', 'name' => 'admin.permission.asign', 'description' => 'Puede otorgar o quitar permisos']);
-        Permission::create(['guard_name' => 'sanctum', 'name' => 'admin.role.view', 'description' => 'Puede ver permisos']);
-        Permission::create(['guard_name' => 'sanctum', 'name' => 'admin.role.asign', 'description' => 'Puede otorgar o quitar permisos']);
-        Permission::create(['guard_name' => 'sanctum', 'name' => 'admin.role-permission.view', 'description' => 'Puede ver permisos de roles']);
-        Permission::create(['guard_name' => 'sanctum', 'name' => 'admin.role-permission.asign', 'description' => 'Puede otorgar o quitar permisos a roles']);
-        Permission::create(['guard_name' => 'sanctum', 'name' => 'admin.activity.log', 'description' => 'Puede ver los activity logs']);
-        Permission::create(['guard_name' => 'sanctum', 'name' => 'admin.users.view', 'description' => 'Puede ver el listado de usuarios']);
 
-        $admin = Role::create(['guard_name' => 'sanctum', 'name' => 'admin']);
-        $adminApp = Role::create(['guard_name' => 'sanctum', 'name' => 'admin.app']);
+        $admin = Role::firstOrCreate(['name' => 'admin']);
+        $adminApp = Role::firstOrCreate(['name' => 'admin.app']);
+        Permission::firstOrCreate(['name' => 'admin.permission.view', 'description' => 'Puede ver permisos']);
+        Permission::firstOrCreate(['name' => 'admin.permission.asign', 'description' => 'Puede otorgar o quitar permisos']);
+        Permission::firstOrCreate(['name' => 'admin.role.view', 'description' => 'Puede ver permisos']);
+        Permission::firstOrCreate(['name' => 'admin.role.asign', 'description' => 'Puede otorgar o quitar permisos']);
+        Permission::firstOrCreate(['name' => 'admin.role-permission.view', 'description' => 'Puede ver permisos de roles']);
+        Permission::firstOrCreate(['name' => 'admin.role-permission.asign', 'description' => 'Puede otorgar o quitar permisos a roles']);
+        Permission::firstOrCreate(['name' => 'admin.activity.log', 'description' => 'Puede ver los activity logs']);
+        Permission::firstOrCreate(['name' => 'admin.users.view', 'description' => 'Puede ver el listado de usuarios']);
 
         $admin->givePermissionTo(Permission::findByName('admin.permission.view'));
         $admin->givePermissionTo(Permission::findByName('admin.permission.asign'));
@@ -37,5 +38,7 @@ class RolesSeeder extends Seeder
         $admin->givePermissionTo(Permission::findByName('admin.role.asign'));
         $admin->givePermissionTo(Permission::findByName('admin.role-permission.view'));
         $admin->givePermissionTo(Permission::findByName('admin.role-permission.asign'));
+        $admin->givePermissionTo(Permission::findByName('admin.activity.log'));
+        $admin->givePermissionTo(Permission::findByName('admin.users.view'));
     }
 }
