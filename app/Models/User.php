@@ -10,6 +10,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
@@ -20,6 +21,7 @@ class User extends Authenticatable
     protected $connection = 'admin';
     protected $table = 'users';
     protected $primaryKey = 'id';
+    protected string $guard_name = 'sanctum';
     // /**
     //  * The attributes that are mass assignable.
     //  *
@@ -38,7 +40,11 @@ class User extends Authenticatable
         'password',
     ];
 
-    protected string $guard_name = 'sanctum';
+
+    public function userAdmin(): BelongsTo
+    {
+        return $this->belongsTo(UsuariosAdmin::class, 'id', 'ReferenciaID');
+    }
 
 
     // /**
