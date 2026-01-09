@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AuthRequest;
+use App\Models\PersonasAdmin;
 use App\Models\User;
+use App\Models\UsuariosAdmin;
 use Exception;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -27,6 +30,12 @@ class AuthController extends Controller
     public function login(AuthRequest $request)
     {
         try {
+            // dd([
+            //     'bearer' => $request->bearerToken(),
+            //     'guard' => config('auth.guards.sanctum'),
+            //     'user' => $request->user('sanctum')?->id,
+            // ]);
+
             $data = $request->all();
             // $data = $request->validate([
             //     'type' => ['required', 'string'],
@@ -42,13 +51,17 @@ class AuthController extends Controller
                         // $user = User::where('email', $request->_id)->first();
                         $user = User::where('email', $data['_id'])->first();
                     } else {
-                        /* $person = Person::where('documento', $request->_id)->first();
+                        $person = PersonasAdmin::where('documento', $request->_id)->first();
                         if (!$person) {
-                            throw new AuthException(['general' => 'Usuario no encontrado'], 404);
+                            throw new Exception('Persona no encontrada');
                         } else {
-                            $user = User::find($person->usuarioID);
-                        } */
-                        throw new Exception('Usuario no encontrado');
+                            $user = $person->UsuarioAdmin;
+                            if (!$user) {
+                                throw new Exception('Usuario no encontrado');
+                            }
+                            $user = $user->users;
+                        }
+                        // throw new Exception('Usuario no encontrado');
                     }
                     // Cuando _id es DNI -- HAY QUE RESOLVERLO CON PERSONA MODEL
                     break;
@@ -71,7 +84,22 @@ class AuthController extends Controller
                     }
                     /* AuthService::checkToken($request->header('Authorization'));
                     $user = User::find(Auth::id()); */
-                    $user = $request->user();
+                    // $user = $request->user();
+
+                    // fuerza a Sanctum a validar el Bearer del request
+                    $user = $request->user('sanctum'); // o auth('sanctum')->user();
+
+                    if (!$user) {
+                        throw new Exception('No se ha proporcionado un token');
+                        // return response()->json(['message' => 'Unauthenticated.'], 401);
+                    }
+
+                    // si querés también asegurar que hay token actual:
+                    if (!$user->currentAccessToken()) {
+                        throw new Exception('No se ha proporcionado un token');
+                        // return response()->json(['message' => 'Unauthenticated.'], 401);
+                    }
+
                     $token = $user->currentAccessToken(); // token actual autenticado :contentReference[oaicite:9]{index=9}
                     $token->delete();
 
@@ -84,10 +112,23 @@ class AuthController extends Controller
 
                     break;
             }
-
-            if (! $user || ! Hash::check($data['password'], $user->password)) {
-                // Activitylog: podés registrar intento fallido sin causer si querés (opcional)
-                return response()->json(['message' => 'Credenciales inválidas'], 422);
+            /* dd($user->userAdmin->persona->only([
+                'id',
+                'documento',
+                'nombres',
+                'apellidos',
+                'nombreCompleto',
+                'genero',
+                'celular',
+                'correoElectronico',
+                'direccionCompleta',
+            ])); */
+            if (array_key_exists('password', $data)) {
+                if (! $user || ! Hash::check($data['password'], $user->password)) {
+                    // Activitylog: podés registrar intento fallido sin causer si querés (opcional)
+                    return sendResponse(null, 'Credenciales inválidas', 422);
+                    // return response()->json(['message' => 'Credenciales inválidas'], 422);
+                }
             }
 
             $deviceName = $data['device_name']
@@ -109,9 +150,20 @@ class AuthController extends Controller
                     'id' => $user->id,
                     'email' => $user->email,
                     "auth_method" => $request['type'],
-                    'persona' => [],
+                    'persona' => $user->userAdmin->persona->only([
+                        'id',
+                        'documento',
+                        'nombres',
+                        'apellidos',
+                        'nombreCompleto',
+                        'genero',
+                        'celular',
+                        'correoElectronico',
+                        'direccionCompleta',
+                    ]),
                     'roles' => $user->getRoleNames(),
                     'permissions' => $user->getAllPermissions()->pluck('name'),
+                    'token_weblogin' => $user->token_weblogin,
                 ],
             ], null, 200);
             // return response()->json([
@@ -128,7 +180,7 @@ class AuthController extends Controller
         } catch (\Throwable $th) {
             //throw $th;
             $log = saveLog($th, 'error', __FUNCTION__);
-            return sendResponse(null, $log, 490);
+            return sendResponse(null, $th->getMessage(), 490);
         }
     }
 
