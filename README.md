@@ -16,3 +16,5 @@
 ## Installar Laravel Spatie PDF:
 
 `composer run-script install-puppeteer`
+
+descomnetar ruta en api.php `Route::get('prueba_pdf',[PDFController::class,'pdf']);`
