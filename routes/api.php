@@ -20,5 +20,5 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 /* Ruta para probar si se genera el pdf */
-// Route::get('prueba_pdf',[PDFController::class,'pdf']);
+ Route::get('prueba_pdf',[PDFController::class,'pdf']);
 // });
