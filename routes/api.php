@@ -5,7 +5,6 @@ use App\Http\Controllers\PDFController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
 /* Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum'); */
@@ -20,5 +19,5 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 /* Ruta para probar si se genera el pdf */
- Route::get('prueba_pdf',[PDFController::class,'pdf']);
+Route::get('prueba_pdf', [PDFController::class, 'pdf']);
 // });
