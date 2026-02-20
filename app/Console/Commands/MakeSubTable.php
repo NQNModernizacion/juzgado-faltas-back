@@ -4,17 +4,17 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\File;
 
 class MakeSubTable extends Command
 {
     // Opciones del comando
     protected $signature = 'make:sub-table 
-                            {--model= : Nombre del modelo}
-                            {--name= : Nombre del subconjunto en la tabla}
-                            {--labels= : Lista de labels separados por coma}
-                            {--file= : Ruta a un archivo txt con un label por "linea"';
+                            {--model= : Nombre del modelo (ej: EstadoTicket)}
+                            {--name= : Nombre del subconjunto en la tabla (ej: estado_ticket)}
+                            {--labels= : Lista de labels separados por coma (ej: "Abierto,Resuelto")}
+                            {--file= : Ruta a un archivo txt con un label por línea}';
 
     protected $description = 'Crea un modelo hijo de Table e inserta los datos en la DB.';
 
@@ -25,31 +25,27 @@ class MakeSubTable extends Command
         $labelsRaw = $this->option('labels');
         $file = $this->option('file');
 
-        if (! $modelName || ! $name) {
-            $this->error('Faltan parametros: --model y --name son obligatorios.');
-
+        if (!$modelName || !$name) {
+            $this->error('Faltan parámetros: --model y --name son obligatorios.');
             return;
         }
 
-        if (! $labelsRaw && ! $file) {
+        if (!$labelsRaw && !$file) {
             $this->error('Debes usar --labels o --file para indicar los datos.');
-
             return;
         }
 
-        //obtener los datos a insertar
+        // 1. Obtener los datos a insertar
         $labels = [];
         if ($file) {
-            if (! File::exists($file)) {
-                return $this->error('El archivo no existe.');
-            }
+            if (!File::exists($file)) return $this->error("El archivo no existe.");
             $labels = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         } else {
-            $cleanLabels = str_replace(['[', ']', "'", '"'], '', $labelsRaw);
+            $cleanLabels = str_replace(["[", "]", "'", "\""], "", $labelsRaw);
             $labels = array_map('trim', explode(',', $cleanLabels));
         }
 
-        //insertar en la BD
+        // 2. Insertar en la Base de Datos
         $insertData = [];
         foreach ($labels as $key => $value) {
             $snakeCaseValue = Str::snake(preg_replace('/[^a-z0-9_]/', '', Str::ascii(strtolower($value))));
@@ -61,24 +57,23 @@ class MakeSubTable extends Command
             ];
         }
         DB::table('tables')->insert($insertData);
-        $this->info('Registros insertados en la base de datos.');
+        $this->info("Registros insertados en la base de datos.");
 
-        //crear el archivo del modelo automaticamente
+        // 3. Crear el archivo del Modelo automáticamente
         $this->createModel($modelName, $name);
     }
 
     private function createModel($modelName, $name)
     {
-        //la ruta donde se creara el archivo basandose en el directorio introducio por comando
+        // Ruta donde se creará el archivo basándonos en tu directorio
         $path = app_path("Models/Table/{$modelName}.php");
 
         if (File::exists($path)) {
             $this->warn("El modelo {$modelName}.php ya existe.");
-
             return;
         }
 
-        //el contenido exacto que tendra el nuevo archivo PHP
+        // El contenido exacto que tendrá el nuevo archivo PHP
         $stub = <<<EOT
 <?php
 
