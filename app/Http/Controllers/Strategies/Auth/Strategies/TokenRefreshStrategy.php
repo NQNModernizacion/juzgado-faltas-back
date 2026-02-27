@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Strategies\AuthStrategies\Auth\Strategies;
+namespace App\Http\Controllers\Strategies\Auth\Strategies;
 
 use App\Http\Controllers\Strategies\Auth\AuthStrategy;
 use App\Models\User;
