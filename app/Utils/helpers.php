@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Error\ErrorResponse;
+use App\Services\ErrorLogService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
@@ -17,6 +18,28 @@ if (!function_exists('sendResponse')) {
         ], $status);
     }
 }
+
+if (!function_exists('error_response')) {
+    function error_response(Throwable $e, ?string $context = null, int $status = 500)
+    {
+        $reference = ErrorLogService::handle($e, $context);
+            
+        if ($reference === null) {
+            return sendResponse(null, ['general' => $e->getMessage()], 422);
+        }
+
+        // En debug: mostrar mensaje real. En producción: mensaje genérico + referencia.
+        $message = config('app.debug')
+            ? $e->getMessage()
+            : "Ha ocurrido un error interno. Código de referencia: {$reference}";
+
+        return sendResponse(null, [
+            //'general'   => $message,
+            'reference' => $reference,
+        ], $status);
+    }
+}
+
 
 if (!function_exists('is_email')) {
     function is_email(string $email): bool

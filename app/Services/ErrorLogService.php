@@ -106,34 +106,12 @@ class ErrorLogService
                 'url' => request()->fullUrl(),
                 'method' => request()->method(),
                 'ip' => request()->ip(),
-                'input' => self::sanitizeInput(
-                    request()->except(['password', 'password_confirmation', 'token', 'secret', 'authorization', 'cookie'])
-                ),
+                'input' => request()->except(['password', 'password_confirmation', 'token', 'secret', 'authorization', 'cookie']),
             ],
         ];
     }
 
-    /**
-     * Tiene el fin de limpiar los datos de entrada para evitar guardar información sensible o demasiado voluminosa en los logs.
-     */
-    protected static function sanitizeInput(array $input): array
-    {
-        $sanitized = [];    
 
-        foreach ($input as $key => $value) {
-            if (Str::contains(strtolower($key), ['password', 'secret', 'token', 'key', 'credential', 'auth'])) {
-                continue;
-            }
-            if (is_string($value)) {
-                $sanitized[$key] = Str::limit($value, 200);
-            } elseif (is_array($value)) {
-                $sanitized[$key] = '[array]';
-            } else {
-                $sanitized[$key] = $value;
-            }
-        }
-        return $sanitized;
-    }
     /**
      * Mandamos al discord el error
      */
@@ -221,7 +199,7 @@ class ErrorLogService
         }
 
         // cambiar esto en produccion 
-        if (!self::isLowPriority($e) && config('app.env') === 'produccion') {
+        if (!self::isLowPriority($e) && config('app.env') === 'local') {
             self::notifyDiscord($e, $errorReference, $context);
         }
 
