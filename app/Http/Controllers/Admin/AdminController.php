@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\PermissionRegistrar;
 
-class AdminBootstrapController extends Controller
+class AdminController extends Controller
 {
     public function index(Request $request)
     {
@@ -40,7 +40,6 @@ class AdminBootstrapController extends Controller
 
         return response()->json([
             'data' => [
-                // ✅ NO users (vos dijiste que no hace falta)
                 'roles' => Role::query()
                     ->orderBy('name')
                     ->get()
@@ -48,7 +47,7 @@ class AdminBootstrapController extends Controller
                         'id' => $r->id,
                         'description' => $r->name,
                         'name' => $r->name,
-                        // opcional: si querés precargar permisos del rol para UI
+                        // opcional
                         // 'permissions' => $r->permissions()->select('id','name')->get(),
                     ])
                     ->values(),
@@ -69,8 +68,6 @@ class AdminBootstrapController extends Controller
 
     public function getPersonInfoByDni(Request $request, string $dni)
     {
-        // si querés restringir:
-        // abort_unless($request->user()?->hasPermissionTo('admin.users.view','sanctum'), 403);
 
         $dniClean = preg_replace('/\D+/', '', (string) $dni);
 

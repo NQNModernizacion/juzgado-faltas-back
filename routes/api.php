@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Admin\AdminBootstrapController;
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PDFController;
 use Illuminate\Http\Request;
@@ -21,13 +21,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
-    Route::get('bootstrap', [AdminBootstrapController::class, 'index']);
-   Route::get('get_person_info/{dni}', [AdminBootstrapController::class, 'getPersonInfoByDni']);
-    Route::post('users/{user}/sync-roles', [AdminBootstrapController::class, 'syncRoles']);
-    Route::post('roles/{role}/sync-permissions', [AdminBootstrapController::class, 'syncRolePermissions']);
+    Route::get('bootstrap', [AdminController::class, 'index']);
+   Route::get('get_person_info/{dni}', [AdminController::class, 'getPersonInfoByDni']);
+    Route::post('users/{user}/sync-roles', [AdminController::class, 'syncRoles']);
+    Route::post('roles/{role}/sync-permissions', [AdminController::class, 'syncRolePermissions']);
     
-    Route::get('user-by-dni/{dni}', [AdminBootstrapController::class, 'userByDni']);
-    Route::post('users/{user}/sync-permissions', [AdminBootstrapController::class, 'syncPermissions']);
+    Route::get('user-by-dni/{dni}', [AdminController::class, 'userByDni']);
+    Route::post('users/{user}/sync-permissions', [AdminController::class, 'syncPermissions']);
 });
 
 /* Ruta para probar si se genera el pdf */
