@@ -20,3 +20,14 @@
 `composer run-script install-puppeteer`
 
 descomnetar ruta en api.php `Route::get('prueba_pdf',[PDFController::class,'pdf']);`
+
+# **T A B L E S:** Abstracción
+
+### Sintaxis de creación por **C O M A N D O**
+```bash
+php artisan make:sub-table --model=NuevoModelo --name=nueva_tabla --labels="Opción1,Opción2,Opción3,Opción4" 
+```
+**Reglas:**
+- Prohibido usar a `TABLES` para hacer relaciones. Sustituir los Models que se extendienden de `TABLES` (es decir, que son creados a partir del comando anterior).
+- **ATENCIÓN:** **[php ... --model=X --name=Y ...]** la combinacion X e Y no debe existir en la BD.
+

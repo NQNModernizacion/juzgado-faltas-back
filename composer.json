@@ -49,6 +49,11 @@
             "@php artisan app:init"
             
         ],
+        "install-puppeteer": [
+            "composer require spatie/laravel-pdf",
+            "npm i -D puppeteer@19.8.5",
+            "@php artisan pdf:setup"
+        ],
         "setup": [
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
