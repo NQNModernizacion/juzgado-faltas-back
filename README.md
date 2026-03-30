@@ -14,9 +14,6 @@
 # Contenido del template
 
 ## Installar Laravel Spatie PDF:
-
-`composer require spatie/laravel-pdf`
-`composer require spatie/browsershot`
 `composer run-script install-puppeteer`
 
 descomnetar ruta en api.php `Route::get('prueba_pdf',[PDFController::class,'pdf']);`
