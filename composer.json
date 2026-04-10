@@ -86,7 +86,6 @@
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
         ],
         "reset": [
-            "php artisan db:wipe",
             "php artisan migrate:fresh --seed",
             "php artisan permission:cache-reset",
             "php artisan optimize:clear"
