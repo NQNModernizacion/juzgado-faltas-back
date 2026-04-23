@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "template/laravel-2026",
+    "name": "laravel/juzgado-faltas",
     "type": "project",
     "description": "Template de laravel 2026",
     "keywords": [
@@ -47,7 +47,6 @@
         "init-app": [
             "composer install",
             "@php artisan app:init"
-            
         ],
         "install-puppeteer": [
             "composer require spatie/laravel-pdf",
@@ -88,7 +87,11 @@
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
         ],
-        "install-puppeteer":"npm install puppeteer"
+        "reset": [
+            "php artisan migrate:fresh --seed",
+            "php artisan permission:cache-reset",
+            "php artisan optimize:clear"
+        ]
     },
     "extra": {
         "laravel": {
