@@ -59,10 +59,52 @@ class MakeSubTable extends Command
         DB::table('tables')->insert($insertData);
         $this->info("Registros insertados en la base de datos.");
 
-        // 3. Crear el archivo del Modelo automáticamente
+        // 3. Crear el Seeder automáticamente
+        $this->createSeeder($modelName, $name, $labels);
+
+        // 4. Crear el archivo del Modelo automáticamente
         $this->createModel($modelName, $name);
     }
 
+
+    private function createSeeder($modelName, $name, $labels)
+    {
+        $path = database_path("seeders/{$modelName}Seeder.php");
+
+        if (File::exists($path)) {
+            $this->warn("El seeder {$modelName}Seeder.php ya existe.");
+            return;
+        }
+
+        $rows = array_map(function ($label) use ($name) {
+            $value = Str::snake(preg_replace('/[^a-z0-9_]/', '', Str::ascii(strtolower($label))));
+            return "            ['name' => '{$name}', 'value' => '{$value}', 'label' => '{$label}', 'descripcion' => '{$label}'],";
+        }, $labels);
+
+        $rowsString = implode("\n", $rows);
+
+        $stub = <<<EOT
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class {$modelName}Seeder extends Seeder
+{
+    public function run(): void
+    {
+        DB::table('tables')->insert([
+{$rowsString}
+        ]);
+    }
+}
+EOT;
+
+        File::put($path, $stub);
+        $this->info("Seeder creado en: {$path}");
+    }
     private function createModel($modelName, $name)
     {
         // Ruta donde se creará el archivo basándonos en tu directorio
