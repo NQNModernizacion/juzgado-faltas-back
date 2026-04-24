@@ -8,8 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class {{ class }} extends Model
 {
     {{ factory }}
-    protected $connection;
-
+    
     protected $table = '';
 
     protected $fillable = [];
