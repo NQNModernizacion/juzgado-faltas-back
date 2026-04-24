@@ -2,17 +2,18 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Inspector;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
+
 
 class StoreActaRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     protected function prepareForValidation(): void
@@ -24,30 +25,23 @@ class StoreActaRequest extends FormRequest
         ]);
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
             'grupo_acta_id' => ['nullable', 'integer', 'exists:grupos_actas,id'],
-
-            'year' => ['nullable', 'string', 'max:10'],
-
-            'oficina_id' => ['nullable', 'exists:oficinas,id'],
-
-            // ASUMIDO: este campo existe en tu tabla/modelo/request
             'numero_acta' => [
                 'required',
                 'string',
                 'max:50',
                 Rule::unique('actas', 'numero_acta')->where(function ($query) {
-                    return $query->where('oficina_id', $this->oficina_id);
+                    return $query
+                        ->where('oficina_id', $this->oficina_id)
+                        ->whereNull('deleted_at');
                 }),
             ],
 
+            'year' => ['nullable', 'string', 'max:10'],
+            'oficina_id' => ['nullable', 'exists:oficinas,id'],
             'fecha_labrada' => ['nullable', 'date'],
             'fecha_carga' => ['nullable', 'date'],
 
@@ -65,29 +59,62 @@ class StoreActaRequest extends FormRequest
             'fecha_estado' => ['nullable', 'date'],
 
             'desestimada' => ['nullable', 'boolean'],
-
             'fecha_notificado' => ['nullable', 'date'],
 
-            'inspector_1_id' => ['nullable', 'exists:inspectores,id'],
-            'inspector_2_id' => ['nullable', 'exists:inspectores,id'],
+            'inspector_1_id' => ['nullable', 'integer', 'exists:inspectores,id'],
+            'inspector_2_id' => ['nullable', 'integer', 'exists:inspectores,id'],
 
             'infracciones' => ['nullable', 'string'],
         ];
     }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $oficinaId = $this->oficina_id;
+
+            if (!$oficinaId) {
+                return;
+            }
+
+            if ($this->filled('inspector_1_id') && !$this->inspectorPerteneceAOficina($this->inspector_1_id, $oficinaId)) {
+                $validator->errors()->add(
+                    'inspector_1_id',
+                    'El inspector 1 no pertenece a la oficina seleccionada.'
+                );
+            }
+
+            if ($this->filled('inspector_2_id') && !$this->inspectorPerteneceAOficina($this->inspector_2_id, $oficinaId)) {
+                $validator->errors()->add(
+                    'inspector_2_id',
+                    'El inspector 2 no pertenece a la oficina seleccionada.'
+                );
+            }
+        });
+    }
+
+    protected function inspectorPerteneceAOficina(int $inspectorId, int $oficinaId): bool
+    {
+        return Inspector::where('id', $inspectorId)
+            ->where('oficina_id', $oficinaId)
+            ->exists();
+    }
+
     public function messages(): array
     {
         return [
+            'grupo_acta_id.integer' => 'El grupo de acta debe ser un número válido.',
             'grupo_acta_id.exists' => 'El grupo de acta seleccionado no existe.',
-
-            'year.string' => 'El año debe ser un texto válido.',
-            'year.max' => 'El año no puede superar los 10 caracteres.',
-
-            'oficina_id.exists' => 'La oficina seleccionada no existe.',
 
             'numero_acta.required' => 'El número de acta es obligatorio.',
             'numero_acta.string' => 'El número de acta debe ser un texto válido.',
             'numero_acta.max' => 'El número de acta no puede superar los 50 caracteres.',
             'numero_acta.unique' => 'Ya existe un acta con ese número para la oficina seleccionada.',
+
+            'year.string' => 'El año debe ser un texto válido.',
+            'year.max' => 'El año no puede superar los 10 caracteres.',
+
+            'oficina_id.exists' => 'La oficina seleccionada no existe.',
 
             'fecha_labrada.date' => 'La fecha labrada debe tener una fecha válida.',
             'fecha_carga.date' => 'La fecha de carga debe tener una fecha válida.',
@@ -111,36 +138,24 @@ class StoreActaRequest extends FormRequest
 
             'fecha_notificado.date' => 'La fecha de notificación debe tener una fecha válida.',
 
+            'inspector_1_id.integer' => 'El inspector 1 debe ser un número válido.',
             'inspector_1_id.exists' => 'El inspector 1 seleccionado no existe.',
+
+            'inspector_2_id.integer' => 'El inspector 2 debe ser un número válido.',
             'inspector_2_id.exists' => 'El inspector 2 seleccionado no existe.',
 
             'infracciones.string' => 'El campo infracciones debe ser un texto válido.',
         ];
     }
 
-    public function attributes(): array
+    public function failedValidation(Validator $validator)
     {
-        return [
-            'grupo_acta_id' => 'grupo de acta',
-            'year' => 'año',
-            'oficina_id' => 'oficina',
-            'numero_acta' => 'número de acta',
-            'fecha_labrada' => 'fecha labrada',
-            'fecha_carga' => 'fecha de carga',
-            'tipo_id' => 'tipo',
-            'sub_tipo_id' => 'sub tipo',
-            'ley_id' => 'ley',
-            'lugar' => 'lugar',
-            'calle_id' => 'calle',
-            'numero_calle' => 'número de calle',
-            'cruce_id' => 'cruce',
-            'estado_acta_id' => 'estado del acta',
-            'fecha_estado' => 'fecha de estado',
-            'desestimada' => 'desestimada',
-            'fecha_notificado' => 'fecha de notificación',
-            'inspector_1_id' => 'inspector 1',
-            'inspector_2_id' => 'inspector 2',
-            'infracciones' => 'infracciones',
-        ];
+        throw new HttpResponseException(sendResponse(null, $validator->errors(), 422));
+    }
+    protected function failedAuthorization()
+    {
+        throw new HttpResponseException(
+            sendResponse(null, 'No autorizado', 403)
+        );
     }
 }
