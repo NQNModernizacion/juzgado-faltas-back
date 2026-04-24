@@ -13,7 +13,7 @@ class AgruparActasRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -34,6 +34,7 @@ class AgruparActasRequest extends FormRequest
         return [
             'acta_ids.min' => 'Debés enviar al menos 2 actas para agrupar.',
             'acta_ids.*.distinct' => 'No podés repetir actas en la agrupación.',
+            'acta_ids.*.exists' => 'El acta :input seleccionada en :attribute no existe.',
         ];
     }
 
