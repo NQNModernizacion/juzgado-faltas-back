@@ -27,7 +27,7 @@ return new class extends Migration
 
 
             // otros campos de la causa
-            $table->foreignId('estado_causa_id')->constrained('estados_generales', 'id')->nullable()->onDelete('set null');
+            $table->foreignId('estado_causa_id')->nullable()->constrained('estados_generales', 'id')->onDelete('set null');
             $table->text('observacion')->nullable();
 
             $table->timestamps();
