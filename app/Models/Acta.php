@@ -13,14 +13,25 @@ class Acta extends Model
 
     protected $fillable = [
         'grupo_acta_id',
-        "codigo",
-        "nombre",
-        "descripcion",
-        "fecha",
-        "tipo_acta",
-        "sub_tipo",
-        "ley",
-        "estado_general",
+        'numero_acta',
+        "year",
+        "oficina_id",
+        "fecha_labrada",
+        "fecha_carga",
+        "tipo_id",
+        "sub_tipo_id",
+        "ley_id",
+        "lugar",
+        "calle_id",
+        "numero_calle",
+        "cruce_id",
+        "estado_acta_id",
+        "fecha_estado",
+        "desestimada",
+        "fecha_notificado",
+        "inspector_1_id",
+        "inspector_2_id",
+        "infracciones"
     ];
 
     protected $hidden = [
