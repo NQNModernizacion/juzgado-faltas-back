@@ -39,7 +39,7 @@ class ActaController extends Controller
         } catch (\Throwable $e) {
             saveLog($e,'error');
 
-            return sendResponse(null, 'Error al crear el acta', 500);
+            return error_response($e);
         }
     }
 
@@ -52,13 +52,13 @@ class ActaController extends Controller
 
             return sendResponse($grupo, null, 200);
         } catch (\DomainException $e) {
-
+            saveLog($e);
             return sendResponse(null, $e->getMessage(), 422);
         } catch (\Throwable $e) {
 
             saveLog($e);
 
-            return sendResponse(null, 'Error al agrupar actas', 500);
+            return error_response($e);
         }
     }
 
@@ -142,6 +142,12 @@ class ActaController extends Controller
             throw new \DomainException('Debés seleccionar al menos 2 actas.');
         }
 
+        // Validamos si todas las actas ya pertenecen al mismo grupo
+        $uniqueGrupoIds = $actas->pluck('grupo_acta_id')->unique();
+        if ($uniqueGrupoIds->count() === 1 && $uniqueGrupoIds->first() !== null) {
+            throw new \DomainException('Las actas seleccionadas ya se encuentran agrupadas en el mismo grupo.');
+        }
+
         foreach ($actas as $acta) {
             if (!$acta->grupo) {
                 throw new \DomainException("El acta {$acta->id} no tiene grupo.");
@@ -178,6 +184,7 @@ class ActaController extends Controller
         foreach ($grupos as $grupo) {
             if ($grupo->actas_count === 0) {
                 $grupo->update(['estado' => 'inactivo']);
+                $grupo->delete();
             }
         }
     }
