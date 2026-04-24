@@ -37,7 +37,7 @@ class ActaController extends Controller
 
             return sendResponse($acta->load('grupo'));
         } catch (\Throwable $e) {
-            saveLog($e,'error al crear acta');
+            saveLog($e,'error');
 
             return sendResponse(null, 'Error al crear el acta', 500);
         }
