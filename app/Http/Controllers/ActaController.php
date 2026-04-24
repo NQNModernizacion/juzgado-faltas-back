@@ -52,7 +52,7 @@ class ActaController extends Controller
 
             return sendResponse($grupo, null, 200);
         } catch (\DomainException $e) {
-            saveLog($e);
+            // saveLog($e);
             return sendResponse(null, $e->getMessage(), 422);
         } catch (\Throwable $e) {
 
