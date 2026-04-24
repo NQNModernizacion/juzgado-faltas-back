@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class AgruparActasRequest extends FormRequest
 {
@@ -33,5 +35,16 @@ class AgruparActasRequest extends FormRequest
             'acta_ids.min' => 'Debés enviar al menos 2 actas para agrupar.',
             'acta_ids.*.distinct' => 'No podés repetir actas en la agrupación.',
         ];
+    }
+
+    public function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(sendResponse(null, $validator->errors(), 422));
+    }
+    protected function failedAuthorization()
+    {
+        throw new HttpResponseException(
+            sendResponse(null, 'No autorizado', 403)
+        );
     }
 }
