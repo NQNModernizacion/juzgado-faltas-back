@@ -38,5 +38,5 @@ Route::get('prueba_pdf', [PDFController::class, 'pdf']);
 
 Route::get('datos_acta', [DatosActaController::class, 'index']);
 Route::get('datos_acta/{oficina}', [DatosActaController::class, 'getDatosPorOficina']);
-Route::get('registar_acta', [ActaController::class, 'store']);
+Route::post('registar_acta', [ActaController::class, 'store']);
 Route::post('agrupar_actas', [ActaController::class, 'agrupar']);
