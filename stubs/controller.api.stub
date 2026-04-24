@@ -14,9 +14,8 @@ class {{ class }} extends Controller
     {
         try {
         } catch (\Throwable $th) {
-            saveLog($th, 'error', __FUNCTION__);
-
-            return sendResponse(null, $th->getMessage(), 490);
+           
+            return error_response($th);
         }
     }
 
@@ -27,9 +26,8 @@ class {{ class }} extends Controller
     {
         try {
         } catch (\Throwable $th) {
-            saveLog($th, 'error', __FUNCTION__);
-
-            return sendResponse(null, $th->getMessage(), 490);
+           
+            return error_response($th);
         }
     }
 
@@ -40,9 +38,8 @@ class {{ class }} extends Controller
     {
         try {
         } catch (\Throwable $th) {
-            saveLog($th, 'error', __FUNCTION__);
-
-            return sendResponse(null, $th->getMessage(), 490);
+           
+            return error_response($th);
         }
     }
 
@@ -53,9 +50,8 @@ class {{ class }} extends Controller
     {
         try {
         } catch (\Throwable $th) {
-            saveLog($th, 'error', __FUNCTION__);
-
-            return sendResponse(null, $th->getMessage(), 490);
+           
+            return error_response($th);
         }
     }
 
@@ -66,9 +62,8 @@ class {{ class }} extends Controller
     {
         try {
         } catch (\Throwable $th) {
-            saveLog($th, 'error', __FUNCTION__);
-
-            return sendResponse(null, $th->getMessage(), 490);
+           
+            return error_response($th);
         }
     }
 }
