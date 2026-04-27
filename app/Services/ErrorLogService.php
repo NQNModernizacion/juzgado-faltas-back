@@ -199,7 +199,7 @@ class ErrorLogService
         }
 
         // cambiar esto en produccion 
-        if (!self::isLowPriority($e) && config('app.env') === 'local') {
+        if (!self::isLowPriority($e)) {
             self::notifyDiscord($e, $errorReference, $context);
         }
 
