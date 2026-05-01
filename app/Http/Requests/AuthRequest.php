@@ -3,9 +3,11 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+use App\Http\Requests\Traits\TraitRequest;
 class AuthRequest extends FormRequest
 {
+    use TraitRequest;
+
     public function authorize(): bool
     {
         return true;
