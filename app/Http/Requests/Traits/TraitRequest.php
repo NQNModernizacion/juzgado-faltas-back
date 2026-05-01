@@ -7,8 +7,19 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 
 trait TraitRequest
 {
-    public function failedValidation(Validator $validator)
+    protected function failedValidation(Validator $validator): void
     {
-        throw new HttpResponseException(sendResponse(null, $validator->errors(), 422));
+        throw new HttpResponseException(
+            sendResponse(null, $validator->errors(), 422)
+        );
+    }
+
+    protected function failedAuthorization(): void
+    {
+        throw new HttpResponseException(
+            sendResponse(null, 'No autorizado', 403)
+        );
     }
 }
+
+?>
