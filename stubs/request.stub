@@ -5,9 +5,11 @@ namespace {{ namespace }};
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Http\Requests\Traits\TraitRequest;
 
 class {{ class }} extends FormRequest
 {
+    use TraitRequest;
     public function authorize(): bool
     {
         return true;
@@ -18,19 +20,5 @@ class {{ class }} extends FormRequest
         return [
             //
         ];
-    }
-
-    protected function failedValidation(Validator $validator): void
-    {
-        throw new HttpResponseException(
-            sendResponse(null, $validator->errors(), 422)
-        );
-    }
-
-    protected function failedAuthorization(): void
-    {
-        throw new HttpResponseException(
-            sendResponse(null, 'No autorizado', 403)
-        );
     }
 }
