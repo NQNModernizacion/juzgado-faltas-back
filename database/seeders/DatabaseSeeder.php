@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             CalleSeeder::class,
             JuecesSeeder::class,
             JuzgadosSeeder::class,
+            SecretariaSeeder::class,
             OficinasInternasSeeder::class,
             InfraccionSeeder::class,
         ]);
