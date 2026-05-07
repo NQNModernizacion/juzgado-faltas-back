@@ -64,7 +64,32 @@ class StoreActaRequest extends FormRequest
             'inspector_1_id' => ['nullable', 'integer', 'exists:inspectores,id'],
             'inspector_2_id' => ['nullable', 'integer', 'exists:inspectores,id'],
 
-            'infracciones' => ['nullable', 'string'],
+            'infracciones' => ['nullable', 'array'],
+            'infracciones.*' => ['integer', 'exists:infracciones,id'],
+
+            'padrones' => ['required', 'array'],
+            'padrones.*.tipo_id' => ['required', Rule::exists('estados_generales', 'id')->where(function ($query) {
+                return $query->where('label', 'TIPO_PADRON');
+            })],
+            'padrones.*.identificacion' => ['required', 'string'],
+            'padrones.*.nombre' => ['required', 'string'],
+            'padrones.*.categoria_padron_id' => [
+                'nullable',
+                Rule::exists('estados_generales', 'id')->where(function ($query) {
+                    return $query->where('label', 'CATEGORIA_PADRON');
+                })
+            ],
+            'infractores' => ['required', 'array'],
+            'infractores.*.tipo_id' => ['required', Rule::exists('estados_generales', 'id')->where(function ($query) {
+                return $query->where('label', 'DOCUMENTO_TIPO');
+            })],
+            'infractores.*.identificacion' => ['required', 'string'],
+            'infractores.*.documento' => ['required', 'string'],
+            'infractores.*.nombre' => ['required', 'string'],
+            'infractores.*.domicilio' => ['nullable', 'string'],
+            'infractores.*.categoria_infractor_id' => ['nullable', 'integer', Rule::exists('estados_generales', 'id')->where(function ($query) {
+                return $query->where('label', 'CATEGORIA_INFRACTOR');
+            })],
         ];
     }
 
@@ -144,7 +169,9 @@ class StoreActaRequest extends FormRequest
             'inspector_2_id.integer' => 'El inspector 2 debe ser un número válido.',
             'inspector_2_id.exists' => 'El inspector 2 seleccionado no existe.',
 
-            'infracciones.string' => 'El campo infracciones debe ser un texto válido.',
+            'infracciones.array' => 'El campo infracciones debe ser un arreglo.',
+            'infracciones.*.integer' => 'Cada infracción debe ser un número entero.',
+            'infracciones.*.exists' => 'Una de las infracciones seleccionadas no existe.',
         ];
     }
 
