@@ -16,8 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('codigo')->nullable();
             $table->string('descripcion')->nullable();
             $table->string('secretaria')->nullable();
-            $table->dateTime('fecha_desde')->nullable();
-            $table->dateTime('fecha_hasta')->nullable();
+            $table->integer('desde')->nullable();
+            $table->integer('hasta')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
