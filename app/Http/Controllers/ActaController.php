@@ -7,6 +7,13 @@ use App\Models\Acta;
 use App\Http\Requests\StoreActaRequest;
 use App\Http\Requests\UpdateActaRequest;
 use App\Models\GrupoActa;
+use App\Models\Padron;
+use App\Models\Infractor;
+use App\Models\Juez;
+use App\Models\Juzgado;
+use App\Models\OficinaInterna;
+use App\Models\Secretaria;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ActaController extends Controller
@@ -32,15 +39,64 @@ class ActaController extends Controller
 
                 $data['grupo_acta_id'] = $grupoId;
 
-                return Acta::create($data);
+                $acta = Acta::create($data);
+                $this->procesarPadrones($data['padrones'], $acta);
+                $this->procesarInfractores($data['infractores'], $acta);
+                $this->procesarInfracciones($data['infracciones'] ?? [], $acta);
+                $this->procesarDatosCausa($acta);
+
+                return $acta;
             });
 
-            return sendResponse($acta->load('grupo'));
+            return sendResponse($acta->load('grupo', 'padrones', 'infractores', 'infracciones'));
         } catch (\Throwable $e) {
-            saveLog($e,'error');
+            saveLog($e, 'error');
 
             return error_response($e);
         }
+    }
+
+    private function procesarInfracciones(array $infraccionIds, Acta $acta)
+    {
+        if (!empty($infraccionIds)) {
+            $acta->infracciones()->sync($infraccionIds);
+        }
+    }
+
+    private function procesarDatosCausa(Acta $acta)
+    {
+        // "numero_juzgado_id",
+        // "oficina_interna_id",
+        // "secretaria_id",
+        // "juez_id",
+        // "causa_id_padre",
+        // "fecha_vinculacion_padre",
+        // "caratula",
+        // "estado_causa_id",
+        // "fecha_estado_causa",
+        // "fecha_notificado_causa",
+        // "observacion",
+        $mesPar = (int) Carbon::parse($acta->fecha_hora)->format('m') % 2 == 0;
+        $juzgadoQuery = Juzgado::query();
+        $juzgado = $mesPar ?  $juzgadoQuery->where('numero_juzgado', 1)->first() : $juzgadoQuery->where('numero_juzgado', 2)->first();
+        $oficinaInterna = OficinaInterna::where('codigo', '0')->first()->id;
+        $acta->update([
+            'numero_juzgado_id' => $juzgado->id,
+            'oficina_interna_id' => $oficinaInterna,
+            'secretaria_id' => null,
+            'juez_id' => $this->resolverJuezId($juzgado->juez_id),
+            'estado_causa_id' => 1,
+            'fecha_estado_causa' => Carbon::now()->format('Y-m-d'),
+            'fecha_notificado_causa' => $acta->fecha_notificado,
+        ]);
+    }
+    private function resolverJuezId($juezId)
+    {
+        return Juez::query()->where('id', $juezId)->first()->id;
+    }
+    private function resolverSecretariaId($secretariaId)
+    {
+        return Secretaria::query()->where('id', $secretariaId)->first()->id;
     }
 
     public function agrupar(AgruparActasRequest $request)
@@ -62,29 +118,6 @@ class ActaController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Acta $acta)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateActaRequest $request, Acta $acta)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Acta $acta)
-    {
-        //
-    }
     private function resolverGrupoActaId(?int $grupoActaId): int
     {
         if ($grupoActaId) {
@@ -186,6 +219,47 @@ class ActaController extends Controller
                 $grupo->update(['estado' => 'inactivo']);
                 $grupo->delete();
             }
+        }
+    }
+
+    private function procesarPadrones(array $padrones, Acta $acta)
+    {
+        foreach ($padrones as $padronData) {
+            $padron = Padron::updateOrCreate(
+                [
+                    'tipo_id' => $padronData['tipo_id'],
+                    'identificacion' => $padronData['identificacion']
+                ],
+                [
+                    'nombre' => $padronData['nombre']
+                ]
+            );
+
+            $acta->padrones()->attach($padron->id, [
+                'categoria_padron_id' => $padronData['categoria_id'] ?? null
+            ]);
+        }
+    }
+
+    private function procesarInfractores(array $infractores, Acta $acta)
+    {
+        foreach ($infractores as $infractorData) {
+            $infractor = Infractor::updateOrCreate(
+                [
+                    'tipo_id' => $infractorData['tipo_id'],
+                    'identificacion' => $infractorData['identificacion']
+                ],
+                [
+                    'documento' => $infractorData['documento'],
+                    'nombre' => $infractorData['nombre'],
+                    'domicilio' => $infractorData['domicilio'] ?? null
+                ]
+            );
+
+            $acta->infractores()->attach($infractor->id, [
+                'categoria_infractor_id' => $infractorData['categoria_infractor_id'] ?? null,
+                'observaciones' => $infractorData['observaciones'] ?? null
+            ]);
         }
     }
 }
