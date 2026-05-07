@@ -50,7 +50,7 @@ class ActaController extends Controller
 
             return sendResponse($acta->load('grupo', 'padrones', 'infractores', 'infracciones'));
         } catch (\Throwable $e) {
-            saveLog($e, 'error');
+            // saveLog($e, 'error');
 
             return error_response($e);
         }
@@ -80,11 +80,14 @@ class ActaController extends Controller
         $juzgadoQuery = Juzgado::query();
         $juzgado = $mesPar ?  $juzgadoQuery->where('numero_juzgado', 1)->first() : $juzgadoQuery->where('numero_juzgado', 2)->first();
         $oficinaInterna = OficinaInterna::where('codigo', '0')->first()->id;
+        $juez = $this->resolverJuezId($juzgado->juez_id);
+        $secretaria = $this->resolverSecretariaId($acta, $juez, $juzgado);
+
         $acta->update([
             'numero_juzgado_id' => $juzgado->id,
             'oficina_interna_id' => $oficinaInterna,
-            'secretaria_id' => null,
-            'juez_id' => $this->resolverJuezId($juzgado->juez_id),
+            'secretaria_id' => $secretaria->id,
+            'juez_id' => $juez->id,
             'estado_causa_id' => 1,
             'fecha_estado_causa' => Carbon::now()->format('Y-m-d'),
             'fecha_notificado_causa' => $acta->fecha_notificado,
@@ -92,11 +95,21 @@ class ActaController extends Controller
     }
     private function resolverJuezId($juezId)
     {
-        return Juez::query()->where('id', $juezId)->first()->id;
+        return Juez::query()->where('id', $juezId)->first();
     }
-    private function resolverSecretariaId($secretariaId)
+    private function resolverSecretariaId(Acta $acta, Juez $juez, Juzgado $juzgado)
     {
-        return Secretaria::query()->where('id', $secretariaId)->first()->id;
+
+        $fecha = Carbon::parse($acta->fecha_labrada);
+        $dia = $fecha->day;
+        $secretariaCodigo = "{$juzgado->numero_juzgado}{$juez->codigo}";
+        $secretaria = Secretaria::query();
+        if ($dia <= 15) {
+            $secretaria->where('codigo', $secretariaCodigo)->where('desde', 1)->where('hasta', 15);
+        } else {
+            $secretaria->where('codigo', $secretariaCodigo)->where('desde', 16)->where('hasta', 31);
+        }
+        return $secretaria->first();
     }
 
     public function agrupar(AgruparActasRequest $request)
