@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('acta_id')->constrained('actas', 'id')->cascadeOnDelete();
             $table->foreignId('padron_id')->constrained('padrones', 'id')->cascadeOnDelete();
-            $table->foreignId('categoria_padron_id')->constrained('estados_generales', 'id')->cascadeOnDelete();
+            $table->foreignId('categoria_padron_id')->nullable()->constrained('estados_generales', 'id')->cascadeOnDelete();
             $table->timestamps();
         });
     }
