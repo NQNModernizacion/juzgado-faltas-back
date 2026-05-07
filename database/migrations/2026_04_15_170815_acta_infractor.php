@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('infractor_id')->constrained('infractores', 'id')->cascadeOnDelete();
 
             // Campo extra para diferenciar el tipo de infractor
-            $table->foreignId('categoria_infractor_id')->constrained('estados_generales', 'id')->cascadeOnDelete();
+            $table->foreignId('categoria_infractor_id')->nullable()->constrained('estados_generales', 'id')->cascadeOnDelete();
             $table->text('observaciones')->nullable();
             $table->timestamps();
         });
