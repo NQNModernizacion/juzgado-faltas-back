@@ -31,7 +31,18 @@ class Acta extends Model
         "fecha_notificado",
         "inspector_1_id",
         "inspector_2_id",
-        "infracciones"
+
+        "numero_juzgado_id",
+        "oficina_interna_id",
+        "secretaria_id",
+        "juez_id",
+        "causa_id_padre",
+        "fecha_vinculacion_padre",
+        "caratula",
+        "estado_causa_id",
+        "fecha_estado_causa",
+        "fecha_notificado_causa",
+        "observacion",
     ];
 
     protected $hidden = [
@@ -43,15 +54,36 @@ class Acta extends Model
     {
         return $this->belongsTo(GrupoActa::class, 'grupo_acta_id');
     }
-    public function causa()
+    // public function causa()
+    // {
+    //     return $this->hasOneThrough(
+    //         Causa::class,
+    //         GrupoActa::class,
+    //         'id',
+    //         'grupo_acta_id',
+    //         'grupo_acta_id',
+    //         'id'
+    //     );
+    // }
+
+    public function padrones()
     {
-        return $this->hasOneThrough(
-            Causa::class,
-            GrupoActa::class,
-            'id',
-            'grupo_acta_id',
-            'grupo_acta_id',
-            'id'
-        );
+        return $this->belongsToMany(Padron::class, 'acta_padron')
+            ->withPivot('categoria_padron_id')
+            ->withTimestamps();
+    }
+
+    public function infractores()
+    {
+        return $this->belongsToMany(Infractor::class, 'acta_infractores')
+            ->withPivot('categoria_infractor_id', 'observaciones')
+            ->withTimestamps();
+    }
+
+    public function infracciones()
+    {
+        return $this->belongsToMany(Infraccion::class, 'acta_infraccion')
+            ->using(ActaInfraccion::class)
+            ->withTimestamps();
     }
 }
