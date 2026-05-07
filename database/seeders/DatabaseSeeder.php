@@ -22,8 +22,10 @@ class DatabaseSeeder extends Seeder
             OficinaSeeder::class,
             InspectorSeeder::class,
             CalleSeeder::class,
-
-
+            JuecesSeeder::class,
+            JuzgadosSeeder::class,
+            OficinasInternasSeeder::class,
+            InfraccionSeeder::class,
         ]);
         // User::factory(10)->create();
 
