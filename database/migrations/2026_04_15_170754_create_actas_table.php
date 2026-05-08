@@ -49,7 +49,7 @@ return new class extends Migration
             // CUASA
             $table->foreignId('numero_juzgado_id')->nullable()->constrained('juzgados', 'id')->onDelete('set null');
             // $table->dateTime('fecha_alta_causa')->nullable();
-            $table->foreignId('oficina_interna_id')->nullable()->constrained('oficina_internas', 'id')->onDelete('set null');
+            // $table->foreignId('oficina_interna_id')->nullable()->constrained('oficina_internas', 'id')->onDelete('set null');
             $table->foreignId('secretaria_id')->nullable()->constrained('secretarias', 'id')->onDelete('set null');
             $table->foreignId('juez_id')->nullable();
 
