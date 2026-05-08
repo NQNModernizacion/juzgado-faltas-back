@@ -18,11 +18,12 @@ class InspectorResource extends JsonResource
         return [
 
             'id'     => $this->id,
-            'nombre' => $this->nombre, // O el campo que uses para el nombre completo
+            'nombre' => $this->nombre,
             'apellido' => $this->apellido,
             'legajo' => $this->legajo,
             'estado' => new EstadosGeneralesResource($this->estadoInspector),
-            // 'nombre' => $this->oficina_id, 
+            'oficina_id' => $this->oficina_id,
+            'oficina' => new OficinaResource($this->oficina),
         ];
     }
 }
