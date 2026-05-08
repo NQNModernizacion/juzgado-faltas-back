@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Infractor extends Model
 {
+    use LogsActivity;
     use SoftDeletes;
     protected $table = 'infractores';
 
@@ -17,6 +20,12 @@ class Infractor extends Model
         'nombre',
         'domicilio'
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll();
+    }
 
     public function actas()
     {

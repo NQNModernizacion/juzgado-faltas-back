@@ -4,10 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Acta extends Model
 {
     //
+    use LogsActivity;
     use SoftDeletes;
     protected $table = 'actas';
 
@@ -50,6 +54,75 @@ class Acta extends Model
         'updated_at',
         'deleted_at'
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll();
+    }
+
+    public function syncInfraccionesConLog(array $infraccionesIds)
+    {
+        // 1. Hacemos el sync. 
+        // Laravel es genial y sync() nos devuelve un array con exactamente qué IDs se agregaron, quitaron o actualizaron.
+        $cambios = $this->infracciones()->sync($infraccionesIds);
+
+        // 2. Solo registramos en la auditoría SI REALMENTE HUBO CAMBIOS.
+        // Si el usuario le dio a "Guardar" pero no modificó las infracciones, nos ahorramos un log basura.
+        if (!empty($cambios['attached']) || !empty($cambios['detached']) || !empty($cambios['updated'])) {
+
+            activity()
+                ->causedBy(Auth::user()->id ?? null)
+                ->performedOn($this) // $this hace referencia a esta misma Acta
+                ->withProperties([
+                    'infracciones' => $infraccionesIds,
+                    'detalle_cambios'      => $cambios // Guardamos qué se agregó y qué se quitó
+                ])
+                ->event('syncInfracciones')
+                ->log('El usuario actualizó las infracciones del acta');
+        }
+    }
+    public function syncPadronesConLog(array $padronesData)
+    {
+        // 1. Hacemos el sync con los datos y atributos extra
+        $cambios = $this->padrones()->sync($padronesData);
+
+        // 2. Verificamos si realmente hubo alteraciones
+        if (!empty($cambios['attached']) || !empty($cambios['detached']) || !empty($cambios['updated'])) {
+
+            activity()
+                ->causedBy(Auth::user()->id ?? null)
+                ->performedOn($this) // Atamos el log al Acta
+                ->withProperties([
+                    // Guardamos la estructura completa con los atributos intermedios
+                    'padrones_data'   => $padronesData,
+                    'detalle_cambios' => $cambios
+                ])
+                ->event('syncPadrones')
+                ->log('El usuario actualizó los padrones vinculados al acta');
+        }
+    }
+    public function syncInfractoresConLog(array $infractoresData)
+    {
+        // 1. Hacemos el sync con los datos y atributos extra
+        $cambios = $this->infractores()->sync($infractoresData);
+
+        // 2. Verificamos si realmente hubo alteraciones
+        if (!empty($cambios['attached']) || !empty($cambios['detached']) || !empty($cambios['updated'])) {
+
+            activity()
+                ->causedBy(Auth::user()->id ?? null)
+                ->performedOn($this) // Atamos el log al Acta
+                ->withProperties([
+                    // Guardamos la estructura completa con los atributos intermedios
+                    'infractores_data'   => $infractoresData,
+                    'detalle_cambios' => $cambios
+                ])
+                ->event('syncInfractores')
+                ->log('El usuario actualizó los infractores vinculados al acta');
+        }
+    }
+
     public function grupo()
     {
         return $this->belongsTo(GrupoActa::class, 'grupo_acta_id');
@@ -85,5 +158,10 @@ class Acta extends Model
         return $this->belongsToMany(Infraccion::class, 'acta_infraccion')
             ->using(ActaInfraccion::class)
             ->withTimestamps();
+    }
+
+    public function movimientos()
+    {
+        return $this->hasMany(Movimiento::class, 'acta_id');
     }
 }

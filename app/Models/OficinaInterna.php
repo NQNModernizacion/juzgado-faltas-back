@@ -11,7 +11,24 @@ class OficinaInterna extends Model
     use SoftDeletes;
     protected $table = 'oficina_internas';
 
-    protected $fillable = [];
+    protected $fillable = [
+        'codigo',
+        'descripcion'
+    ];
 
-    protected $hidden = [];
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at'
+    ];
+
+    public function movimientosOrigen()
+    {
+        return $this->hasOne(Movimiento::class, 'oficina_id_origen');
+    }
+
+    public function movimientosDestino()
+    {
+        return $this->hasOne(Movimiento::class, 'oficina_id_destino');
+    }
 }

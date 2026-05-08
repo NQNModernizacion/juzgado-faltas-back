@@ -1,11 +1,15 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class GrupoActa extends Model
 {
+    use LogsActivity;
     use SoftDeletes;
 
     protected $table = 'grupos_actas';
@@ -14,6 +18,12 @@ class GrupoActa extends Model
         'estado',
         'observacion',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll();
+    }
 
     public function actas()
     {

@@ -6,9 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Infraccion extends Model
 {
+    use LogsActivity;
     use SoftDeletes;
 
     protected $table = 'infracciones';
@@ -26,10 +29,16 @@ class Infraccion extends Model
         'monto_minimo',
         'admite_pago_voluntario',
     ];
-    
+
     protected $casts = [
         'admite_pago_voluntario' => 'boolean',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll();
+    }
 
     /**
      * Relación con el tipo de infracción (EstadosGenerales).
