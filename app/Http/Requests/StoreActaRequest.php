@@ -2,15 +2,15 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Traits\TraitRequest;
 use App\Models\Inspector;
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
 
 class StoreActaRequest extends FormRequest
 {
+    use TraitRequest;
     public function authorize(): bool
     {
         return true;
@@ -173,16 +173,5 @@ class StoreActaRequest extends FormRequest
             'infracciones.*.integer' => 'Cada infracción debe ser un número entero.',
             'infracciones.*.exists' => 'Una de las infracciones seleccionadas no existe.',
         ];
-    }
-
-    public function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(sendResponse(null, $validator->errors(), 422));
-    }
-    protected function failedAuthorization()
-    {
-        throw new HttpResponseException(
-            sendResponse(null, 'No autorizado', 403)
-        );
     }
 }
