@@ -6,16 +6,10 @@ use App\Http\Requests\AgruparActasRequest;
 use App\Models\Acta;
 use App\Http\Requests\StoreActaRequest;
 use App\Http\Requests\UpdateActaRequest;
-use App\Models\GrupoActa;
-use App\Models\Padron;
-use App\Models\Infractor;
-use App\Models\Juez;
-use App\Models\Juzgado;
-use App\Models\Movimiento;
-use App\Models\OficinaInterna;
-use App\Models\Secretaria;
+use App\Http\Resources\ActaResource;
 use App\Services\ActaService;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ActaController extends Controller
@@ -32,9 +26,41 @@ class ActaController extends Controller
         try {
             $acta = $this->actaService->registrarActa($request->validated());
 
-            return sendResponse($acta->load('grupo', 'padrones', 'infractores', 'infracciones'));
+            return sendResponse(new ActaResource($acta->load('grupo', 'padrones', 'infractores', 'infracciones')));
+        } catch (\DomainException $e) {
+            return sendResponse(null, ['general' => $e->getMessage()], 422);
         } catch (\Throwable $e) {
-            return error_response($e);
+            return error_response($e, __FUNCTION__);
+        }
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        try {
+            $actas = $this->actaService->obtenerListadoActas($request->all());
+
+            return sendResponse(ActaResource::collection($actas)->response()->getData(true));
+        } catch (\Throwable $e) {
+            return error_response($e, __FUNCTION__);
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show($id)
+    {
+        try {
+            $acta = $this->actaService->obtenerDetalleActa($id);
+
+            return sendResponse(new ActaResource($acta));
+        } catch (\DomainException $e) {
+            return sendResponse(null, ['general' => $e->getMessage()], 422);
+        } catch (\Throwable $e) {
+            return error_response($e, __FUNCTION__);
         }
     }
 
@@ -48,10 +74,9 @@ class ActaController extends Controller
 
             return sendResponse($grupo, null, 200);
         } catch (\DomainException $e) {
-            return sendResponse(null, $e->getMessage(), 422);
+            return sendResponse(null, ['general' => $e->getMessage()], 422);
         } catch (\Throwable $e) {
-            saveLog($e);
-            return error_response($e);
+            return error_response($e, __FUNCTION__);
         }
     }
 }
