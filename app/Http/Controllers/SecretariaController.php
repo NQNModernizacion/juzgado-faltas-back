@@ -15,9 +15,7 @@ class SecretariaController extends Controller
     {
         try {
         } catch (\Throwable $th) {
-            saveLog($th, 'error', __FUNCTION__);
-
-            return sendResponse(null, $th->getMessage(), 490);
+            return error_response($th, __FUNCTION__);
         }
     }
 
@@ -28,9 +26,7 @@ class SecretariaController extends Controller
     {
         try {
         } catch (\Throwable $th) {
-            saveLog($th, 'error', __FUNCTION__);
-
-            return sendResponse(null, $th->getMessage(), 490);
+            return error_response($th, __FUNCTION__);
         }
     }
 
@@ -41,9 +37,7 @@ class SecretariaController extends Controller
     {
         try {
         } catch (\Throwable $th) {
-            saveLog($th, 'error', __FUNCTION__);
-
-            return sendResponse(null, $th->getMessage(), 490);
+            return error_response($th, __FUNCTION__);
         }
     }
 
@@ -54,9 +48,7 @@ class SecretariaController extends Controller
     {
         try {
         } catch (\Throwable $th) {
-            saveLog($th, 'error', __FUNCTION__);
-
-            return sendResponse(null, $th->getMessage(), 490);
+            return error_response($th, __FUNCTION__);
         }
     }
 
@@ -67,9 +59,7 @@ class SecretariaController extends Controller
     {
         try {
         } catch (\Throwable $th) {
-            saveLog($th, 'error', __FUNCTION__);
-
-            return sendResponse(null, $th->getMessage(), 490);
+            return error_response($th, __FUNCTION__);
         }
     }
 }
