@@ -28,20 +28,26 @@ class ActaService
     public function registrarActa(array $data): Acta
     {
         return DB::transaction(function () use ($data) {
-            $grupoId = $this->grupoService->resolverGrupoActaId($data['grupo_acta_id'] ?? null);
-
-            $data['grupo_acta_id'] = $grupoId;
-            $data = array_merge($data, $this->procesarDatosCausa($data));
-
-            $acta = Acta::create($data);
-
-            $this->padronService->procesarPadrones($data['padrones'], $acta);
-            $this->infractorService->procesarInfractores($data['infractores'], $acta);
-            $this->procesarInfracciones($data['infracciones'] ?? [], $acta);
-
-            $this->movimientoService->registrarMovimientoInicial($acta);
-
-            return $acta;
+            try {
+                $grupoId = $this->grupoService->resolverGrupoActaId($data['grupo_acta_id'] ?? null);
+ 
+                $data['grupo_acta_id'] = $grupoId;
+                $data = array_merge($data, $this->procesarDatosCausa($data));
+ 
+                $acta = Acta::create($data);
+ 
+                $this->padronService->procesarPadrones($data['padrones'], $acta);
+                $this->infractorService->procesarInfractores($data['infractores'], $acta);
+                $this->procesarInfracciones($data['infracciones'] ?? [], $acta);
+ 
+                $this->movimientoService->registrarMovimientoInicial($acta, $data['oficina_destino_id']);
+ 
+                return $acta;
+            } catch (\DomainException $e) {
+                throw $e;
+            } catch (\Throwable $e) {
+                throw $e;
+            }
         });
     }
 
@@ -71,13 +77,29 @@ class ActaService
         $juzgadoQuery = Juzgado::query();
         $juzgado = $mesPar ?  $juzgadoQuery->where('numero_juzgado', 1)->first() : $juzgadoQuery->where('numero_juzgado', 2)->first();
         
-        $oficinaInterna = OficinaInterna::where('codigo', '0')->first()->id;
+        if (!$juzgado) {
+            throw new \DomainException("No se pudo determinar el juzgado de turno para la fecha indicada.");
+        }
+
+        $oficinaInternaRecord = OficinaInterna::where('codigo', '0')->first();
+        if (!$oficinaInternaRecord) {
+            throw new \DomainException("Error de configuración: No se encontró la oficina interna raíz (código 0).");
+        }
+        $oficinaInterna = $oficinaInternaRecord->id;
+
         $juez = $this->resolverJuezId($juzgado->juez_id);
+        if (!$juez) {
+            throw new \DomainException("El juzgado seleccionado no tiene un juez asignado.");
+        }
+
         $secretaria = $this->resolverSecretariaId($data, $juez, $juzgado);
+        if (!$secretaria) {
+            throw new \DomainException("No se pudo determinar la secretaría de turno para el juzgado {$juzgado->numero_juzgado}.");
+        }
 
         return [
             'numero_juzgado_id' => $juzgado->id,
-            'oficina_interna_id' => $oficinaInterna,
+            'oficina_destino_id' => $oficinaInterna,
             'secretaria_id' => $secretaria->id,
             'juez_id' => $juez->id,
             'estado_causa_id' => 1,
@@ -129,7 +151,53 @@ class ActaService
     public function agruparActas(array $actaIds)
     {
         return DB::transaction(function () use ($actaIds) {
-            return $this->grupoService->agruparActas($actaIds);
+            try {
+                return $this->grupoService->agruparActas($actaIds);
+            } catch (\DomainException $e) {
+                throw $e;
+            } catch (\Throwable $e) {
+                throw $e;
+            }
         });
+    }
+    /**
+     * Obtiene un listado paginado de actas con las relaciones necesarias para la tabla.
+     *
+     * @param int $perPage
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function obtenerListadoActas(array $filters = [], int $perPage = 15)
+    {
+        $query = Acta::with(['juzgado', 'oficina', 'latestMovimiento.oficinaDestino']);
+
+        // Ejemplo de filtro (preparado para futuro)
+        if (!empty($filters['numero_acta'])) {
+            $query->where('numero_acta', 'like', "%{$filters['numero_acta']}%");
+        }
+
+        if (!empty($filters['year'])) {
+            $query->where('year', $filters['year']);
+        }
+
+        return $query->orderBy('id', 'desc')->paginate($perPage);
+    }
+
+    /**
+     * Obtiene el detalle de un acta por su ID con todas sus relaciones.
+     *
+     * @param int $id
+     * @return Acta
+     * @throws \DomainException
+     */
+    public function obtenerDetalleActa(int $id): Acta
+    {
+        $acta = Acta::with(['grupo', 'padrones', 'infractores', 'infracciones', 'juzgado', 'oficina', 'latestMovimiento.oficinaDestino'])
+            ->find($id);
+
+        if (!$acta) {
+            throw new \DomainException("El acta con ID {$id} no existe.");
+        }
+
+        return $acta;
     }
 }
