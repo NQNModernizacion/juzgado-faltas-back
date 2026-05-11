@@ -37,7 +37,6 @@ class Acta extends Model
         "inspector_2_id",
 
         "numero_juzgado_id",
-        "oficina_interna_id",
         "secretaria_id",
         "juez_id",
         "causa_id_padre",
@@ -163,5 +162,20 @@ class Acta extends Model
     public function movimientos()
     {
         return $this->hasMany(Movimiento::class, 'acta_id');
+    }
+
+    public function latestMovimiento()
+    {
+        return $this->hasOne(Movimiento::class, 'acta_id')->latestOfMany();
+    }
+
+    public function juzgado()
+    {
+        return $this->belongsTo(Juzgado::class, 'numero_juzgado_id');
+    }
+
+    public function oficina()
+    {
+        return $this->belongsTo(Oficina::class, 'oficina_id');
     }
 }
