@@ -18,7 +18,10 @@ class UpdateMovimientoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'acta_id' => 'required|exists:actas,id',
+            'oficina_id_destino' => 'required|exists:oficina_internas,id',
+            'motivo' => 'nullable|string',
+            'fojas' => 'nullable|string',
         ];
     }
 }
