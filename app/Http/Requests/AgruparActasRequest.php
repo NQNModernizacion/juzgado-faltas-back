@@ -2,12 +2,12 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\Validator;
+use App\Http\Requests\Traits\TraitRequest;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
 class AgruparActasRequest extends FormRequest
 {
+    use TraitRequest;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -36,16 +36,5 @@ class AgruparActasRequest extends FormRequest
             'acta_ids.*.distinct' => 'No podés repetir actas en la agrupación.',
             'acta_ids.*.exists' => 'El acta :input seleccionada en :attribute no existe.',
         ];
-    }
-
-    public function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(sendResponse(null, $validator->errors(), 422));
-    }
-    protected function failedAuthorization()
-    {
-        throw new HttpResponseException(
-            sendResponse(null, 'No autorizado', 403)
-        );
     }
 }
