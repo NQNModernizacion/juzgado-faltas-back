@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\AgruparActasRequest;
 use App\Models\Acta;
 use App\Http\Requests\StoreActaRequest;
 use App\Http\Requests\UpdateActaRequest;
@@ -48,31 +47,12 @@ class ActaController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
         try {
             $acta = $this->actaService->obtenerDetalleActa($id);
 
             return sendResponse(new ActaResource($acta));
-        } catch (\DomainException $e) {
-            return sendResponse(null, ['general' => $e->getMessage()], 422);
-        } catch (\Throwable $e) {
-            return error_response($e, __FUNCTION__);
-        }
-    }
-
-    /**
-     * Agrupar múltiples actas.
-     */
-    public function agrupar(AgruparActasRequest $request)
-    {
-        try {
-            $grupo = $this->actaService->agruparActas($request->acta_ids);
-
-            return sendResponse($grupo, null, 200);
         } catch (\DomainException $e) {
             return sendResponse(null, ['general' => $e->getMessage()], 422);
         } catch (\Throwable $e) {
