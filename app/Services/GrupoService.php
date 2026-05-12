@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Acta;
 use App\Models\GrupoActa;
 use DomainException;
+use Illuminate\Support\Facades\DB;
 
 class GrupoService
 {
@@ -15,23 +16,19 @@ class GrupoService
      * @return int
      * @throws DomainException
      */
-    public function resolverGrupoActaId(?int $grupoActaId): int
+    public function resolverGrupoActaId(?int $grupoActaId): ?int
     {
-        if ($grupoActaId) {
-            $grupo = GrupoActa::with('causa')->find($grupoActaId);
-
-            if (!$grupo) {
-                throw new DomainException('El grupo indicado no existe.');
-            }
-
-            if ($grupo->causa) {
-                throw new DomainException('No se puede agregar el acta a un grupo que ya tiene causa.');
-            }
-
-            return $grupo->id;
+        if (!$grupoActaId) {
+            return null;
         }
 
-        return GrupoActa::create()->id;
+        $grupo = GrupoActa::find($grupoActaId);
+
+        if (!$grupo) {
+            throw new DomainException('El grupo indicado no existe.');
+        }
+
+        return $grupo->id;
     }
 
     /**
@@ -43,20 +40,92 @@ class GrupoService
      */
     public function agruparActas(array $actaIds): GrupoActa
     {
-        $actas = Acta::with('grupo.causa')
-            ->whereIn('id', $actaIds)
-            ->lockForUpdate()
-            ->get();
+        return DB::transaction(function () use ($actaIds) {
+            $actas = Acta::whereIn('id', $actaIds)
+                ->lockForUpdate()
+                ->get();
 
-        $this->validarAgrupacion($actas);
+            $this->validarAgrupacion($actas);
 
-        $nuevoGrupo = $this->crearGrupo();
+            $nuevoGrupo = $this->crearGrupo();
 
-        $this->moverActasAGrupo($actas, $nuevoGrupo);
+            $this->moverActasAGrupo($actas, $nuevoGrupo);
 
-        $this->manejarGruposVacios($actas);
+            return $nuevoGrupo->load('actas');
+        });
+    }
 
-        return $nuevoGrupo->load('actas');
+    /**
+     * Añade actas huérfanas a un grupo existente.
+     *
+     * @param int $grupoId
+     * @param array $actaIds
+     * @return GrupoActa
+     * @throws DomainException
+     */
+    public function añadirAGrupo(int $grupoId, array $actaIds): GrupoActa
+    {
+        return DB::transaction(function () use ($grupoId, $actaIds) {
+            $grupo = GrupoActa::find($grupoId);
+            if (!$grupo) {
+                throw new DomainException('El grupo indicado no existe.');
+            }
+
+            $actas = Acta::whereIn('id', $actaIds)
+                ->lockForUpdate()
+                ->get();
+
+            foreach ($actas as $acta) {
+                if ($acta->grupo_acta_id !== null) {
+                    if ($acta->grupo_acta_id === $grupo->id) {
+                        throw new DomainException("El acta {$acta->id} ya se encuentra en el grupo seleccionado.");
+                    }
+                    throw new DomainException("El acta {$acta->id} ya pertenece a otro grupo.");
+                }
+            }
+
+            $this->moverActasAGrupo($actas, $grupo);
+
+            return $grupo->load('actas');
+        });
+    }
+
+    /**
+     * Quita las actas de sus grupos y limpia grupos vacíos o con una sola acta.
+     *
+     * @param array $actaIds
+     * @return void
+     */
+    public function desagruparActas(array $actaIds): void
+    {
+        DB::transaction(function () use ($actaIds) {
+            $actas = Acta::whereIn('id', $actaIds)
+                ->lockForUpdate()
+                ->get();
+
+            $grupoIds = $actas->pluck('grupo_acta_id')->filter()->unique();
+
+            if ($grupoIds->count() > 1) {
+                throw new DomainException('No se pueden desagrupar actas que pertenecen a grupos distintos.');
+            }
+
+            if ($grupoIds->count() === 0) {
+                throw new DomainException('Las actas seleccionadas no pertenecen a ningún grupo.');
+            }
+
+            // Si se pasaron varias actas y algunas no tenían grupo (pero solo hay un grupo ID único),
+            // validamos que TODAS las seleccionadas pertenecieran a ese grupo.
+            if ($actas->count() !== $actas->where('grupo_acta_id', $grupoIds->first())->count()) {
+                throw new DomainException('Todas las actas seleccionadas deben pertenecer al mismo grupo.');
+            }
+
+            // Desagrupamos
+            Acta::whereIn('id', $actas->pluck('id'))
+                ->update(['grupo_acta_id' => null]);
+
+            // Limpiamos grupos afectados
+            $this->limpiarGruposInvalidos($grupoIds);
+        });
     }
 
     /**
@@ -72,20 +141,10 @@ class GrupoService
             throw new DomainException('Debés seleccionar al menos 2 actas.');
         }
 
-        $uniqueGrupoIds = $actas->pluck('grupo_acta_id')->unique();
-        if ($uniqueGrupoIds->count() === 1 && $uniqueGrupoIds->first() !== null) {
-            throw new DomainException('Las actas seleccionadas ya se encuentran agrupadas en el mismo grupo.');
-        }
-
+        // Para agrupar (nuevo), TODAS deben ser huérfanas
         foreach ($actas as $acta) {
-            if (!$acta->grupo) {
-                throw new DomainException("El acta {$acta->id} no tiene grupo.");
-            }
-
-            if ($acta->grupo->causa) {
-                throw new DomainException(
-                    "El acta {$acta->id} ya pertenece a un grupo con causa."
-                );
+            if ($acta->grupo_acta_id !== null) {
+                throw new DomainException("El acta {$acta->id} ya pertenece a un grupo. Usá 'Añadir a Grupo' en su lugar.");
             }
         }
     }
@@ -118,24 +177,70 @@ class GrupoService
     }
 
     /**
-     * Maneja el cierre de grupos que quedaron vacíos tras una reagrupación.
+     * Limpia grupos que quedaron vacíos o con una sola acta.
      *
-     * @param \Illuminate\Database\Eloquent\Collection $actas
+     * @param \Illuminate\Support\Collection $grupoIds
      * @return void
      */
-    private function manejarGruposVacios($actas): void
+    private function limpiarGruposInvalidos($grupoIds): void
     {
-        $grupoIds = $actas->pluck('grupo_acta_id')->unique();
-
         $grupos = GrupoActa::withCount('actas')
             ->whereIn('id', $grupoIds)
             ->get();
 
         foreach ($grupos as $grupo) {
-            if ($grupo->actas_count === 0) {
+            if ($grupo->actas_count < 2) {
+                // Si queda una sola acta, la dejamos huérfana
+                if ($grupo->actas_count === 1) {
+                    Acta::where('grupo_acta_id', $grupo->id)
+                        ->update(['grupo_acta_id' => null]);
+                }
+
                 $grupo->update(['estado' => 'inactivo']);
                 $grupo->delete();
             }
         }
+    }
+    /**
+     * Obtiene un listado paginado de grupos de actas.
+     *
+     * @param array $filters
+     * @param int $perPage
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function listarGrupos(array $filters = [], int $perPage = 15)
+    {
+        $query = GrupoActa::withCount('actas');
+
+        if (!empty($filters['estado'])) {
+            $query->where('estado', $filters['estado']);
+        }
+
+        return $query->orderBy('id', 'desc')->paginate($perPage);
+    }
+
+    /**
+     * Obtiene el detalle de un grupo con sus actas y relaciones.
+     *
+     * @param int $id
+     * @return GrupoActa
+     * @throws DomainException
+     */
+    public function obtenerDetalleGrupo(int $id): GrupoActa
+    {
+        $grupo = GrupoActa::with([
+            'actas.padrones',
+            'actas.infractores',
+            'actas.infracciones',
+            'actas.juzgado',
+            'actas.oficina',
+            'actas.latestMovimiento.oficinaDestino'
+        ])->find($id);
+
+        if (!$grupo) {
+            throw new DomainException("El grupo con ID {$id} no existe.");
+        }
+
+        return $grupo;
     }
 }
