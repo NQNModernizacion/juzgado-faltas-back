@@ -29,9 +29,12 @@ class ActaService
     {
         return DB::transaction(function () use ($data) {
             try {
-                $grupoId = $this->grupoService->resolverGrupoActaId($data['grupo_acta_id'] ?? null);
- 
-                $data['grupo_acta_id'] = $grupoId;
+                // Solo asignamos grupo_acta_id si viene explícitamente en el request.
+                // De lo contrario, queda null (según el nuevo requerimiento).
+                if (isset($data['grupo_acta_id'])) {
+                    $data['grupo_acta_id'] = $this->grupoService->resolverGrupoActaId($data['grupo_acta_id']);
+                }
+
                 $data = array_merge($data, $this->procesarDatosCausa($data));
  
                 $acta = Acta::create($data);
@@ -142,24 +145,6 @@ class ActaService
         return $secretaria->first();
     }
 
-    /**
-     * Orquestador para agrupar actas usando el GrupoService.
-     *
-     * @param array $actaIds
-     * @return \App\Models\GrupoActa
-     */
-    public function agruparActas(array $actaIds)
-    {
-        return DB::transaction(function () use ($actaIds) {
-            try {
-                return $this->grupoService->agruparActas($actaIds);
-            } catch (\DomainException $e) {
-                throw $e;
-            } catch (\Throwable $e) {
-                throw $e;
-            }
-        });
-    }
     /**
      * Obtiene un listado paginado de actas con las relaciones necesarias para la tabla.
      *
