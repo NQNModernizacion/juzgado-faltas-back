@@ -1,10 +1,10 @@
 <?php
- 
+
 namespace App\Http\Resources;
- 
+
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
- 
+
 class InfraccionesResource extends JsonResource
 {
     /**
@@ -17,6 +17,7 @@ class InfraccionesResource extends JsonResource
         return [
             'id'             => $this->id,
             'identificacion' => $this->identificacion,
+            'tipo_infraccion_id' => $this->tipo_infraccion_id,
             'tipo_infraccion' => [
                 'id'     => $this->tipoInfraccion?->id,
                 'nombre' => $this->tipoInfraccion?->nombre,
