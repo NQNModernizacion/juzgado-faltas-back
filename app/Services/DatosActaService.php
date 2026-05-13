@@ -52,17 +52,17 @@ class DatosActaService
 
         return [
             'tipos_acta' => EstadosGeneralesResource::collection($estadosAgrupados->get('tipo_acta', [])),
-            'sub_tipos'  => EstadosGeneralesResource::collection($estadosAgrupados->get('sub_tipo', [])),
-            'leyes'      => EstadosGeneralesResource::collection($estadosAgrupados->get('ley', [])),
+            'sub_tipos' => EstadosGeneralesResource::collection($estadosAgrupados->get('sub_tipo', [])),
+            'leyes' => EstadosGeneralesResource::collection($estadosAgrupados->get('ley', [])),
             'infractores' => [
                 "tipo" => EstadosGeneralesResource::collection($estadosAgrupados->get('DOCUMENTO_TIPO', []))
             ],
-            'padrones'           => [
+            'padrones' => [
                 'tipo_padron' => EstadosGeneralesResource::collection($estadosAgrupados->get('TIPO_PADRON', [])),
                 'categorias'  => EstadosGeneralesResource::collection($estadosAgrupados->get('CATEGORIA_PADRON', [])),
             ],
-            'inspectores'        => InspectorResource::collection($this->inspectorService->getInspectoresHabilitados()),
-            'infracciones'       => InfraccionesResource::collection(Infraccion::with('tipoInfraccion')->get()),
+            'inspectores' => InspectorResource::collection($this->inspectorService->getInspectoresHabilitados()),
+            'infracciones' => InfraccionesResource::collection(Infraccion::with('tipoInfraccion')->get()),
             'tipos_infracciones' => EstadosGeneralesResource::collection($estadosAgrupados->get('INFRACCION_TIPO', [])),
         ];
     }
