@@ -51,9 +51,9 @@ class DatosActaService
         $estadosAgrupados = EstadosGenerales::porLabels($labelsInteres)->get()->groupBy('label');
 
         return [
-            'tipo_acta'   => EstadosGeneralesResource::collection($estadosAgrupados->get('tipo_acta', [])),
-            'sub_tipos'   => EstadosGeneralesResource::collection($estadosAgrupados->get('sub_tipo', [])),
-            'leyes'       => EstadosGeneralesResource::collection($estadosAgrupados->get('ley', [])),
+            'tipos_acta' => EstadosGeneralesResource::collection($estadosAgrupados->get('tipo_acta', [])),
+            'sub_tipos'  => EstadosGeneralesResource::collection($estadosAgrupados->get('sub_tipo', [])),
+            'leyes'      => EstadosGeneralesResource::collection($estadosAgrupados->get('ley', [])),
             'infractores' => [
                 "tipo" => EstadosGeneralesResource::collection($estadosAgrupados->get('DOCUMENTO_TIPO', []))
             ],
