@@ -15,8 +15,10 @@ class InfraccionesResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'             => $this->id,
+            'id' => $this->id,
+            'nombre' => "$this->identificacion-$this->descripcion",
             'identificacion' => $this->identificacion,
+            'descripcion' => $this->descripcion,
             'tipo_infraccion_id' => $this->tipo_infraccion_id,
             'tipo_infraccion' => [
                 'id'     => $this->tipoInfraccion?->id,
