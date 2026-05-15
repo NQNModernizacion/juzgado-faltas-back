@@ -7,6 +7,8 @@ use App\Models\Infraccion;
 use App\Http\Resources\EstadosGeneralesResource;
 use App\Http\Resources\InfraccionesResource;
 use App\Http\Resources\InspectorResource;
+use App\Http\Resources\CalleResource;
+use App\Models\Calle;
 
 class DatosActaService
 {
@@ -64,6 +66,8 @@ class DatosActaService
             'inspectores' => InspectorResource::collection($this->inspectorService->getInspectoresHabilitados()),
             'infracciones' => InfraccionesResource::collection(Infraccion::with('tipoInfraccion')->get()),
             'tipos_infracciones' => EstadosGeneralesResource::collection($estadosAgrupados->get('INFRACCION_TIPO', [])),
+            'calles' => CalleResource::collection(Calle::all()),
+            // 'cruces' => CalleResource::collection(Calle::all()),
         ];
     }
 }
