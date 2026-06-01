@@ -20,6 +20,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // ✅ Trusted proxies (reverse proxy / load balancer: Nginx, Cloudflare, AWS ELB...)
+        $trustedProxies = env('TRUSTED_PROXIES', '*');
+
+        $middleware->trustProxies(
+            at: $trustedProxies === '*' ? '*' : array_map('trim', explode(',', $trustedProxies)),
+            headers: Request::HEADER_X_FORWARDED_FOR
+                | Request::HEADER_X_FORWARDED_HOST
+                | Request::HEADER_X_FORWARDED_PORT
+                | Request::HEADER_X_FORWARDED_PROTO
+                | Request::HEADER_X_FORWARDED_AWS_ELB,
+        );
+
         // ✅ Para API: si no está autenticado, NO redirigir a route('login')
         $middleware->redirectGuestsTo(function (Request $request) {
             if ($request->is('api/*')) {
