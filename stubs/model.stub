@@ -1,0 +1,27 @@
+<?php
+
+namespace {{ namespace }};
+
+{{ factoryImport }}
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factory;   
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+
+class {{ class }} extends Model
+{
+    {{ factory }}
+    
+    use LogsActivity;
+    protected $table = '';
+
+    protected $fillable = [];
+
+    protected $hidden = [];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll();
+    }
+}

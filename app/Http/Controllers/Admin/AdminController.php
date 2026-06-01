@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\UsuariosAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -61,6 +62,54 @@ class AdminController extends Controller
                         'description' => $p->description ?? $p->name,
                     ])
                     ->values(),
+
+                // users are stored in `admin`, roles/permissions in `mysql`
+                'users' => (function () {
+                    $adminRoleUserIds = DB::connection('mysql')
+                        ->table('model_has_roles as mhr')
+                        ->join('roles as r', 'r.id', '=', 'mhr.role_id')
+                        ->where('mhr.model_type', User::class)
+                        ->where('r.name', 'admin')
+                        ->pluck('mhr.model_id')
+                        ->unique()
+                        ->values();
+
+                    if ($adminRoleUserIds->isEmpty()) {
+                        return collect();
+                    }
+
+                    $rolesByUser = DB::connection('mysql')
+                        ->table('model_has_roles as mhr')
+                        ->join('roles as r', 'r.id', '=', 'mhr.role_id')
+                        ->where('mhr.model_type', User::class)
+                        ->whereIn('mhr.model_id', $adminRoleUserIds)
+                        ->select(['mhr.model_id', 'r.name'])
+                        ->get()
+                        ->groupBy('model_id');
+
+                    $permissionsByUser = DB::connection('mysql')
+                        ->table('model_has_permissions as mhp')
+                        ->join('permissions as p', 'p.id', '=', 'mhp.permission_id')
+                        ->where('mhp.model_type', User::class)
+                        ->whereIn('mhp.model_id', $adminRoleUserIds)
+                        ->select(['mhp.model_id', 'p.name'])
+                        ->get()
+                        ->groupBy('model_id');
+
+                    return User::query()
+                        ->whereIn('id', $adminRoleUserIds)
+                        ->select(['id', 'email'])
+                        ->get()
+                        ->map(function ($u) use ($rolesByUser, $permissionsByUser) {
+                            return [
+                                'id' => $u->id,
+                                'email' => $u->email,
+                                'roles' => ($rolesByUser->get($u->id) ?? collect())->pluck('name')->values(),
+                                'permissions' => ($permissionsByUser->get($u->id) ?? collect())->pluck('name')->values(),
+                            ];
+                        })
+                        ->values();
+                })(),
             ],
             'error' => null,
         ]);
@@ -110,34 +159,34 @@ class AdminController extends Controller
     }
 
     public function syncRoles(Request $request, User $user)
-{
-    $roleIds = $request->input('role_ids', null);
-    $roles = $request->input('roles', null);
+    {
+        $roleIds = $request->input('role_ids', null);
+        $roles = $request->input('roles', null);
 
-    if (is_array($roleIds)) {
-        $names = Role::query()->whereIn('id', $roleIds)->pluck('name')->values()->all();
-    } elseif (is_array($roles)) {
-        $names = Role::query()->whereIn('name', $roles)->pluck('name')->values()->all();
-    } else {
-        return response()->json(['data' => null, 'error' => 'Enviar role_ids[] o roles[]'], 422);
+        if (is_array($roleIds)) {
+            $names = Role::query()->whereIn('id', $roleIds)->pluck('name')->values()->all();
+        } elseif (is_array($roles)) {
+            $names = Role::query()->whereIn('name', $roles)->pluck('name')->values()->all();
+        } else {
+            return response()->json(['data' => null, 'error' => 'Enviar role_ids[] o roles[]'], 422);
+        }
+
+        if (!count($names)) {
+            return response()->json(['data' => null, 'error' => 'Roles inválidos'], 422);
+        }
+
+        $user->assignRole($names);
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
+        return response()->json([
+            'data' => [
+                'user_id' => $user->id,
+                'roles' => $user->getRoleNames()->values(),
+                'permissions' => $user->getAllPermissions()->pluck('name')->values(),
+            ],
+            'error' => null,
+        ]);
     }
-
-    if (!count($names)) {
-        return response()->json(['data' => null, 'error' => 'Roles inválidos'], 422);
-    }
-
-    $user->assignRole($names);
-    app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
-
-    return response()->json([
-        'data' => [
-            'user_id' => $user->id,
-            'roles' => $user->getRoleNames()->values(),
-            'permissions' => $user->getAllPermissions()->pluck('name')->values(),
-        ],
-        'error' => null,
-    ]);
-}
 
     public function syncPermissions(Request $request, User $user)
     {
@@ -188,34 +237,34 @@ class AdminController extends Controller
             'error' => null,
         ]);
     }
-    
+
     public function userByDni(Request $request, string $dni)
     {
         // Solo auth:sanctum (ya está en rutas). Sin permisos extra para no bloquear el buscador.
         // abort_unless($request->user()?->hasPermissionTo('admin.permission.view'), 403);
-    
+
         $dniClean = preg_replace('/\D+/', '', $dni);
-    
+
         if (!$dniClean || strlen($dniClean) < 7 || strlen($dniClean) > 10) {
             return response()->json(['error' => 'DNI no válido', 'data' => null], 422);
         }
-    
+
         $persona = PersonasAdmin::query()
             ->select(['id', 'documento', 'nombres', 'apellidos'])
             ->where('documento', $dniClean)
             ->first();
-    
+
         if (!$persona) {
             return response()->json(['error' => 'No se encontró persona', 'data' => null], 404);
         }
-    
+
         $usuarioAdmin = UsuariosAdmin::query()
             ->select(['ReferenciaID'])
             ->where('PersonaID', $persona->id)
             ->first();
-    
+
         $userId = (int) ($usuarioAdmin?->ReferenciaID ?? 0);
-    
+
         if (!$userId) {
             return response()->json([
                 'error' => 'La persona no tiene usuario en users',
@@ -230,9 +279,9 @@ class AdminController extends Controller
                 ],
             ], 200);
         }
-    
+
         $user = User::query()->find($userId);
-    
+
         if (!$user) {
             return response()->json([
                 'error' => 'ReferenciaID no existe en users',
@@ -247,7 +296,7 @@ class AdminController extends Controller
                 ],
             ], 409);
         }
-    
+
         return response()->json([
             'error' => null,
             'data' => [

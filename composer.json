@@ -48,6 +48,7 @@
         ],
         "install-puppeteer": [
             "composer require spatie/laravel-pdf",
+            "composer require spatie/browsershot",
             "npm i -D puppeteer@19.8.5",
             "@php artisan pdf:setup"
         ],

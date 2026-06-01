@@ -75,7 +75,7 @@ class AppInit extends Command
             $this->setEnv($path, $db, 'DB_DATABASE');
             $this->setEnv($path, '128.53.80.131', 'DB_HOST');
             $this->setEnv($path, "user{$db}", 'DB_USERNAME');
-            $this->setEnv($path, 'user' . ucfirst($db) . '.2026', 'DB_PASSWORD');
+            $this->setEnv($path, 'user' . ucfirst($db) . '.2020', 'DB_PASSWORD');
 
             $this->setEnv($path, 'https://webservicereplica.muninqn.gov.ar/admin/', 'BASE_ADMIN_URL');
 
