@@ -30,6 +30,17 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::post('users/{user}/sync-permissions', [AdminController::class, 'syncPermissions']);
 });
 
+// TODO: eliminar — diagnóstico de trusted proxies
+Route::get('proxy-check', function (Request $request) {
+    return response()->json([
+        'ip_detectada'        => $request->ip(),
+        'x_forwarded_for'     => $request->header('X-Forwarded-For'),
+        'x_forwarded_proto'   => $request->header('X-Forwarded-Proto'),
+        'x_forwarded_host'    => $request->header('X-Forwarded-Host'),
+        'proxy_confiado'      => in_array($request->server('REMOTE_ADDR'), ['192.168.35.21']) ? 'SÍ' : 'NO (IP real: ' . $request->server('REMOTE_ADDR') . ')',
+    ]);
+});
+
 /* Ruta para probar si se genera el pdf */
 Route::get('prueba_pdf', [PDFController::class, 'pdf']);
 // });
