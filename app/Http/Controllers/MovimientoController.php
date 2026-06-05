@@ -6,6 +6,7 @@ use App\Models\Movimiento;
 use App\Http\Requests\StoreMovimientoRequest;
 use App\Http\Requests\UpdateMovimientoRequest;
 use App\Services\MovimientoService;
+use App\Http\Resources\MovimientoResource;
 
 class MovimientoController extends Controller
 {
@@ -74,6 +75,21 @@ class MovimientoController extends Controller
         } catch (\Throwable $th) {
 
             return error_response($th);
+        }
+    }
+
+    /**
+     * Obtiene los movimientos de un acta específica ordenados por el más reciente.
+     */
+    public function getByActa($actaId)
+    {
+        try {
+            $movimientos = $this->movimientoService->obtenerPorActa($actaId);
+            return sendResponse(MovimientoResource::collection($movimientos));
+        } catch (\DomainException $e) {
+            return sendResponse(null, ['general' => $e->getMessage()], 422);
+        } catch (\Throwable $th) {
+            return error_response($th, __FUNCTION__);
         }
     }
 }
