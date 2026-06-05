@@ -60,4 +60,19 @@ class MovimientoService
             }
         });
     }
+
+    /**
+     * Obtiene todos los movimientos de un acta ordenados del más reciente al más antiguo.
+     *
+     * @param int $actaId
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function obtenerPorActa(int $actaId)
+    {
+        return Movimiento::where('acta_id', $actaId)
+            ->with(['oficinaOrigen', 'oficinaDestino'])
+            ->orderBy('fecha_movimiento', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+    }
 }
