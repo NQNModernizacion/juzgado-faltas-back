@@ -14,6 +14,15 @@ class GrupoActaResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        if ($request->routeIs('actas.show')) {
+            return [
+                'id' => $this->id,
+                'estado' => $this->estado,
+                'observacion' => $this->observacion,
+                // 'actas_count' => $this->whenCounted('actas'),
+                // 'actas' => ActaResource::collection($this->whenLoaded('actas')),
+            ];
+        }
         return [
             'id' => $this->id,
             'estado' => $this->estado,
