@@ -15,7 +15,7 @@ class ActaResource extends JsonResource
     public function toArray(Request $request): array
     {
         // Si la ruta es el listado, devolvemos solo los campos requeridos para la tabla
-        if ($request->routeIs('actas.index')) {
+        if ($request->routeIs(['actas.index', 'grupo_de_acta', 'grupos_actas.show'])) {
             return [
                 'id' => $this->id,
                 'numero_acta' => $this->numero_acta,
@@ -23,6 +23,7 @@ class ActaResource extends JsonResource
                 'juzgado' => $this->juzgado?->descripcion ?? "Sin Juzgado",
                 'oficina' => $this->oficina?->descripcion ?? "Sin Oficina",
                 'ultimo_movimiento' => $this->latestMovimiento?->oficinaDestino?->descripcion ?? "Sin Movimiento",
+                'grupo_acta_id' => $this->grupo_acta_id
             ];
         }
 
@@ -30,6 +31,9 @@ class ActaResource extends JsonResource
         return [
             'id' => $this->id,
             'grupo_acta_id' => $this->grupo_acta_id,
+            'grupo' => $this->whenLoaded('grupo', function () {
+                return new GrupoActaResource($this->grupo);
+            }),
             'numero_acta' => $this->numero_acta,
             'year' => $this->year,
             'oficina_id' => $this->oficina_id,
@@ -49,8 +53,14 @@ class ActaResource extends JsonResource
             'inspector_1_id' => $this->inspector_1_id,
             'inspector_2_id' => $this->inspector_2_id,
             'numero_juzgado_id' => $this->numero_juzgado_id,
-            'secretaria_id' => $this->secretaria_id,
             'juez_id' => $this->juez_id,
+            'juez' => $this->whenLoaded('juez', function () {
+                return new JuezResource($this->juez);
+            }),
+            'secretaria_id' => $this->secretaria_id,
+            'secretaria' => $this->whenLoaded('secretaria', function () {
+                return new SecretariaResource($this->secretaria);
+            }),
             'causa_id_padre' => $this->causa_id_padre,
             'fecha_vinculacion_padre' => $this->fecha_vinculacion_padre,
             'caratula' => $this->caratula,
@@ -58,12 +68,15 @@ class ActaResource extends JsonResource
             'fecha_estado_causa' => $this->fecha_estado_causa,
             'fecha_notificado_causa' => $this->fecha_notificado_causa,
             'observacion' => $this->observacion,
-            
+
             // Relaciones cargadas
             'grupo' => $this->whenLoaded('grupo'),
             'padrones' => $this->whenLoaded('padrones'),
             'infractores' => $this->whenLoaded('infractores'),
-            'infracciones' => $this->whenLoaded('infracciones'),
+
+            'infracciones' => $this->whenLoaded('infracciones', function () {
+                return InfraccionesResource::collection($this->infracciones);
+            }),
             'juzgado' => $this->whenLoaded('juzgado'),
             'oficina' => $this->whenLoaded('oficina'),
             'ultimo_movimiento' => $this->whenLoaded('latestMovimiento'),
