@@ -243,4 +243,38 @@ class GrupoService
 
         return $grupo;
     }
+
+    /**
+     * Obtiene el detalle de un grupo con sus actas y relaciones.
+     *
+     * @param int $id
+     * @return GrupoActa
+     * @throws DomainException
+     */
+    public function obtenerGrupoByActa(int $acta_id): GrupoActa
+    {
+        $acta = Acta::find($acta_id);
+        if (!$acta) {
+            throw new DomainException("El acta con ID {$acta_id} no existe.");
+        }
+
+        $grupo = GrupoActa::with([
+            'actas' => function ($query) use ($acta_id) {
+                $query->where('id', '!=', $acta_id)->with([
+                    'padrones',
+                    'infractores',
+                    'infracciones',
+                    'juzgado',
+                    'oficina',
+                    'latestMovimiento.oficinaDestino'
+                ]);
+            }
+        ])->find($acta->grupo_acta_id);
+
+        if (!$grupo) {
+            throw new DomainException("El grupo con ID {$acta->grupo_acta_id} no existe.");
+        }
+
+        return $grupo;
+    }
 }
