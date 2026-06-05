@@ -30,21 +30,21 @@ class ActaService
         return DB::transaction(function () use ($data) {
             try {
                 // Solo asignamos grupo_acta_id si viene explícitamente en el request.
-                // De lo contrario, queda null (según el nuevo requerimiento).
+                // De lo contrario, queda null.
                 if (isset($data['grupo_acta_id'])) {
                     $data['grupo_acta_id'] = $this->grupoService->resolverGrupoActaId($data['grupo_acta_id']);
                 }
 
                 $data = array_merge($data, $this->procesarDatosCausa($data));
- 
+
                 $acta = Acta::create($data);
- 
+
                 $this->padronService->procesarPadrones($data['padrones'], $acta);
                 $this->infractorService->procesarInfractores($data['infractores'], $acta);
                 $this->procesarInfracciones($data['infracciones'] ?? [], $acta);
- 
+
                 $this->movimientoService->registrarMovimientoInicial($acta, $data['oficina_destino_id']);
- 
+
                 return $acta;
             } catch (\DomainException $e) {
                 throw $e;
@@ -57,14 +57,21 @@ class ActaService
     /**
      * Procesa las infracciones asociadas al acta.
      *
-     * @param array $infraccionIds
+     * @param array $infraccionesData
      * @param Acta $acta
      * @return void
      */
-    public function procesarInfracciones(array $infraccionIds, Acta $acta): void
+    public function procesarInfracciones(array $infraccionesData, Acta $acta): void
     {
-        if (!empty($infraccionIds)) {
-            $acta->syncInfraccionesConLog($infraccionIds);
+        if (!empty($infraccionesData)) {
+            $formatted = [];
+            foreach ($infraccionesData as $item) {
+                $formatted[$item['infraccion_id']] = [
+                    'fecha_infraccion' => isset($item['fecha_infraccion']) ? Carbon::parse($item['fecha_infraccion'])->format('Y-m-d H:i:s') : null,
+                    'lugar' => $item['lugar'] ?? null,
+                ];
+            }
+            $acta->syncInfraccionesConLog($formatted);
         }
     }
 
@@ -79,7 +86,7 @@ class ActaService
         $mesPar = (int) Carbon::parse($data['fecha_labrada'])->format('m') % 2 == 0;
         $juzgadoQuery = Juzgado::query();
         $juzgado = $mesPar ?  $juzgadoQuery->where('numero_juzgado', 1)->first() : $juzgadoQuery->where('numero_juzgado', 2)->first();
-        
+
         if (!$juzgado) {
             throw new \DomainException("No se pudo determinar el juzgado de turno para la fecha indicada.");
         }
@@ -135,13 +142,13 @@ class ActaService
         $fecha = Carbon::parse($data['fecha_labrada']);
         $dia = $fecha->day;
         $secretaria = Secretaria::query();
-        
+
         if ($dia <= 15) {
             $secretaria->where('codigo', "{$juzgado->numero_juzgado}1")->where('desde', 1)->where('hasta', 15);
         } else {
             $secretaria->where('codigo', "{$juzgado->numero_juzgado}2")->where('desde', 16)->where('hasta', 31);
         }
-        
+
         return $secretaria->first();
     }
 
@@ -176,7 +183,7 @@ class ActaService
      */
     public function obtenerDetalleActa(int $id): Acta
     {
-        $acta = Acta::with(['grupo', 'padrones', 'infractores', 'infracciones', 'juzgado', 'oficina', 'latestMovimiento.oficinaDestino'])
+        $acta = Acta::with(['grupo', 'padrones', 'infractores', 'infracciones', 'juzgado', 'oficina', 'latestMovimiento.oficinaDestino', 'juez', 'secretaria'])
             ->find($id);
 
         if (!$acta) {
