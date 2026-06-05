@@ -209,3 +209,46 @@ if (!function_exists('get_file')) {
         ];
     }
 }
+
+if (!function_exists('consultar_aut_externo')) {
+    /**
+     * Consulta una patente de automóvil o motovehículo en la API externa configurada.
+     *
+     * @param string $patente
+     * @return array
+     * @throws \DomainException|\Throwable
+     */
+    function consultar_aut_externo(string $patente): array
+    {
+        $base = env('BASE_WEB_LOGIN_API2');
+        $endpoint = 'dnrpa';
+
+        if (empty($base)) {
+            throw new \DomainException('La URL base para la consulta externa (BASE_WEB_LOGIN_API2) no está configurada.');
+        }
+
+        $token = env('TOKEN_DNRPA');
+        if (empty($token)) {
+            throw new \DomainException('El token de autenticación (TOKEN_AUT_EXTERNO) no está configurado.');
+        }
+
+        $url = $base . $endpoint . '/' . $patente;
+
+        try {
+            $response = Http::withoutVerifying()
+                ->timeout(60)
+                ->withToken($token)
+                ->get($url);
+
+            if ($response->failed()) {
+                $errorData = $response->json();
+                $errorMessage = $errorData['message'] ?? $errorData['error'] ?? 'Error al consultar la patente en la API externa (Código: ' . $response->status() . ').';
+                throw new \DomainException($errorMessage);
+            }
+
+            return $response->json()['value'];
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            throw new \DomainException('Error de conexión con la API externa de automotores.');
+        }
+    }
+}
