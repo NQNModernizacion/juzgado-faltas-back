@@ -21,11 +21,11 @@ class GrupoActaController extends Controller
     public function agrupar(AgruparActasRequest $request)
     {
         try {
-            $grupo = $this->grupoService->agruparActas($request->acta_ids);
+            $grupo = $this->grupoService->agruparActas($request->actas);
 
             return sendResponse(new GrupoActaResource($grupo), null, 200);
         } catch (\DomainException $e) {
-            return sendResponse(null, ['general' => $e->getMessage()], 422);
+            return sendResponse(null, ['message' => $e->getMessage()], 422);
         } catch (\Throwable $e) {
             return error_response($e, __FUNCTION__);
         }
@@ -37,11 +37,11 @@ class GrupoActaController extends Controller
     public function añadirAGrupo(AñadirAGrupoRequest $request)
     {
         try {
-            $grupo = $this->grupoService->añadirAGrupo($request->grupo_id, $request->acta_ids);
+            $grupo = $this->grupoService->añadirAGrupo($request->grupo_id, $request->actas);
 
             return sendResponse(new GrupoActaResource($grupo), null, 200);
         } catch (\DomainException $e) {
-            return sendResponse(null, ['general' => $e->getMessage()], 422);
+            return sendResponse(null, ['message' => $e->getMessage()], 422);
         } catch (\Throwable $e) {
             return error_response($e, __FUNCTION__);
         }
@@ -53,11 +53,11 @@ class GrupoActaController extends Controller
     public function desagrupar(DesagruparActasRequest $request)
     {
         try {
-            $this->grupoService->desagruparActas($request->acta_ids);
+            $this->grupoService->desagruparActas($request->actas);
 
             return sendResponse(null, 'Actas desagrupadas correctamente', 200);
         } catch (\DomainException $e) {
-            return sendResponse(null, ['general' => $e->getMessage()], 422);
+            return sendResponse(null, ['message' => $e->getMessage()], 422);
         } catch (\Throwable $e) {
             return error_response($e, __FUNCTION__);
         }
@@ -87,7 +87,22 @@ class GrupoActaController extends Controller
 
             return sendResponse(new GrupoActaResource($grupo), null, 200);
         } catch (\DomainException $e) {
-            return sendResponse(null, ['general' => $e->getMessage()], 422);
+            return sendResponse(null, ['message' => $e->getMessage()], 422);
+        } catch (\Throwable $e) {
+            return error_response($e, __FUNCTION__);
+        }
+    }
+    /**
+     * Display the specified resource.
+     */
+    public function grupo_por_acta($acta_id)
+    {
+        try {
+            $grupo = $this->grupoService->obtenerGrupoByActa($acta_id);
+
+            return sendResponse(new GrupoActaResource($grupo), null, 200);
+        } catch (\DomainException $e) {
+            return sendResponse(null, ['message' => $e->getMessage()], 404);
         } catch (\Throwable $e) {
             return error_response($e, __FUNCTION__);
         }
