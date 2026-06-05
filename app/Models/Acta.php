@@ -156,6 +156,7 @@ class Acta extends Model
     {
         return $this->belongsToMany(Infraccion::class, 'acta_infraccion')
             ->using(ActaInfraccion::class)
+            ->withPivot('fecha_infraccion', 'lugar')
             ->withTimestamps();
     }
 
@@ -172,6 +173,14 @@ class Acta extends Model
     public function juzgado()
     {
         return $this->belongsTo(Juzgado::class, 'numero_juzgado_id');
+    }
+    public function juez()
+    {
+        return $this->belongsTo(Juez::class, 'juez_id');
+    }
+    public function secretaria()
+    {
+        return $this->belongsTo(Secretaria::class, 'secretaria_id');
     }
 
     public function oficina()
