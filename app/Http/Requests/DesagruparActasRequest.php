@@ -24,16 +24,16 @@ class DesagruparActasRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'acta_ids' => ['required', 'array', 'min:1'],
-            'acta_ids.*' => ['integer', 'distinct', 'exists:actas,id'],
+            'actas' => ['required', 'array', 'min:1'],
+            'actas.*' => ['integer', 'distinct', 'exists:actas,id'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'acta_ids.required' => 'Debés enviar al menos una acta para desagrupar.',
-            'acta_ids.*.exists' => 'Una de las actas seleccionadas no existe.',
+            'actas.required' => 'Debés enviar al menos una acta para desagrupar.',
+            'actas.*.exists' => 'Una de las actas seleccionadas no existe.',
         ];
     }
 }
