@@ -65,7 +65,9 @@ class StoreActaRequest extends FormRequest
             'inspector_2_id' => ['nullable', 'integer', 'exists:inspectores,id'],
 
             'infracciones' => ['nullable', 'array'],
-            'infracciones.*' => ['integer', 'exists:infracciones,id'],
+            'infracciones.*.infraccion_id' => ['required', 'exists:infracciones,id'],
+            'infracciones.*.fecha_infraccion' => ['nullable', 'date'],
+            'infracciones.*.lugar' => ['nullable', 'string', 'max:255'],
 
             'padrones' => ['required', 'array'],
             'padrones.*.tipo_id' => ['required', Rule::exists('estados_generales', 'id')->where(function ($query) {
@@ -170,8 +172,13 @@ class StoreActaRequest extends FormRequest
             'inspector_2_id.exists' => 'El inspector 2 seleccionado no existe.',
 
             'infracciones.array' => 'El campo infracciones debe ser un arreglo.',
-            'infracciones.*.integer' => 'Cada infracción debe ser un número entero.',
-            'infracciones.*.exists' => 'Una de las infracciones seleccionadas no existe.',
+            'infracciones.*.infraccion_id.required' => 'El ID de la infracción es obligatorio.',
+            'infracciones.*.infraccion_id.integer' => 'El ID de la infracción debe ser un número entero.',
+            'infracciones.*.infraccion_id.exists' => 'La infracción seleccionada no existe.',
+            'infracciones.*.fecha_infraccion.required' => 'La fecha de la infracción es obligatoria.',
+            'infracciones.*.fecha_infraccion.date' => 'La fecha de la infracción debe ser una fecha válida.',
+            'infracciones.*.lugar.string' => 'El lugar de la infracción debe ser una cadena de texto.',
+            'infracciones.*.lugar.max' => 'El lugar de la infracción no puede superar los 255 caracteres.',
         ];
     }
 }
