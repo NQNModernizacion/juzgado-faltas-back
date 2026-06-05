@@ -24,17 +24,17 @@ class AgruparActasRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'acta_ids' => ['required', 'array', 'min:2'],
-            'acta_ids.*' => ['integer', 'distinct', 'exists:actas,id'],
+            'actas' => ['required', 'array', 'min:2'],
+            'actas.*' => ['integer', 'distinct', 'exists:actas,id'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'acta_ids.min' => 'Debés enviar al menos 2 actas para agrupar.',
-            'acta_ids.*.distinct' => 'No podés repetir actas en la agrupación.',
-            'acta_ids.*.exists' => 'El acta :input seleccionada en :attribute no existe.',
+            'actas.min' => 'Debés enviar al menos 2 actas para agrupar.',
+            'actas.*.distinct' => 'No podés repetir actas en la agrupación.',
+            'actas.*.exists' => 'El acta :input seleccionada en :attribute no existe.',
         ];
     }
 }
