@@ -42,7 +42,7 @@ class AuthController extends Controller
 
     private function expiresAtFromNow(): string
     {
-        return now()->addMinutes($this->tokenExpirationMinutes())->toISOString();
+        return now()->addMinutes($this->tokenExpirationMinutes())->toIso8601String();
     }
 
     public function login(AuthRequest $request)
@@ -106,7 +106,7 @@ class AuthController extends Controller
                 'token_type' => 'Bearer',
                 'user' => $this->userPayload($user, $request->type),
                 'refreshed' => false,
-                'expires_at' => $expiresAt->toISOString(),
+                'expires_at' => $expiresAt->toIso8601String(),
                 'seconds_left' => $secondsLeft,
             ], null, 200);
         }
