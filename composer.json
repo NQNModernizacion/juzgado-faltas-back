@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/juzgado-faltas",
+    "name": "modernizacion/tribunal-faltas",
     "type": "project",
-    "description": "Template de laravel 2026",
+    "description": "App tribunal de faltas 2026",
     "keywords": [
         "laravel",
         "framework"
