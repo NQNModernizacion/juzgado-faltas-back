@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class EstadosGenerales extends Model
 {
+    use SoftDeletes;
+
     protected $connection;
 
     protected $table = 'estados_generales';
@@ -37,7 +40,7 @@ class EstadosGenerales extends Model
     const HABILITADO = 'HABILITADO';
     const DESHABILITADO = 'DESHABILITADO';
 
-    
+
     /**
      * Scope para filtrar por uno o varios labels.
      * Acepta un string o un array de strings.
