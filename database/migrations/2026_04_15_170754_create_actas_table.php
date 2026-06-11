@@ -56,7 +56,8 @@ return new class extends Migration
             $table->unsignedBigInteger('causa_id_padre')->nullable();
             $table->dateTime('fecha_vinculacion_padre')->nullable();
 
-            $table->text('caratula')->nullable();
+            $table->string('caratula', 255)->nullable();
+            $table->string('color', 20)->nullable();
 
             // otros campos de la causa
             $table->foreignId('estado_causa_id')->nullable()->constrained('estados_generales', 'id')->onDelete('set null');
