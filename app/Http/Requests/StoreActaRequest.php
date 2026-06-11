@@ -92,6 +92,8 @@ class StoreActaRequest extends FormRequest
             'infractores.*.categoria_infractor_id' => ['nullable', 'integer', Rule::exists('estados_generales', 'id')->where(function ($query) {
                 return $query->where('label', 'CATEGORIA_INFRACTOR');
             })],
+            'caratula' => ['required', 'string'],
+            'color' => ['required', 'string'],
         ];
     }
 
@@ -179,6 +181,11 @@ class StoreActaRequest extends FormRequest
             'infracciones.*.fecha_infraccion.date' => 'La fecha de la infracción debe ser una fecha válida.',
             'infracciones.*.lugar.string' => 'El lugar de la infracción debe ser una cadena de texto.',
             'infracciones.*.lugar.max' => 'El lugar de la infracción no puede superar los 255 caracteres.',
+
+            'caratula.required' => 'La caratula es obligatoria.',
+            'caratula.string' => 'La caratula debe ser una cadena de texto.',
+            'color.required' => 'El color es obligatorio.',
+            'color.string' => 'El color debe ser una cadena de texto.',
         ];
     }
 }
