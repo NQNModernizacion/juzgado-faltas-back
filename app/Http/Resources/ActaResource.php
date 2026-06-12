@@ -64,6 +64,7 @@ class ActaResource extends JsonResource
             'causa_id_padre' => $this->causa_id_padre,
             'fecha_vinculacion_padre' => $this->fecha_vinculacion_padre,
             'caratula' => $this->caratula,
+            'color' => $this->color,
             'estado_causa_id' => $this->estado_causa_id,
             'fecha_estado_causa' => $this->fecha_estado_causa,
             'fecha_notificado_causa' => $this->fecha_notificado_causa,
