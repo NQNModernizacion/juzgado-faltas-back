@@ -14,6 +14,13 @@ class SecretariaResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'codigo' => $this->codigo,
+            'descripcion' => $this->descripcion,
+            'secretaria' => $this->secretaria,
+            'desde' => $this->desde,
+            'hasta' => $this->hasta
+        ];
     }
 }
