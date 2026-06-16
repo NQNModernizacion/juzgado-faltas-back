@@ -127,6 +127,14 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'rate_limit' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/rate_limit.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30,
+            'formatter' => \Monolog\Formatter\JsonFormatter::class,
+        ],
+
     ],
 
 ];
