@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Services;
+
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -79,7 +81,7 @@ class ErrorLogService
     protected static function getSafeUser(): ?object
     {
         try {
-            return auth()->check() ? auth()->user() : null;
+            return Auth::check() ? Auth::id() : null;
         } catch (Throwable) {
             return null;
         }
@@ -126,10 +128,18 @@ class ErrorLogService
             $severity = self::classifySeverity($e);
 
             $emoji = match ($severity) {
-                'critical' => '🔴', 'high' => '🟠', 'medium' => '🟡', 'low' => '🔵', default => '⚪',
+                'critical' => '🔴',
+                'high' => '🟠',
+                'medium' => '🟡',
+                'low' => '🔵',
+                default => '⚪',
             };
             $color = match ($severity) {
-                'critical' => 15158332, 'high' => 16744448, 'medium' => 16776960, 'low' => 3447003, default => 9807270,
+                'critical' => 15158332,
+                'high' => 16744448,
+                'medium' => 16776960,
+                'low' => 3447003,
+                default => 9807270,
             };
 
             $userId = self::getSafeUserId();
@@ -205,5 +215,4 @@ class ErrorLogService
 
         return $errorReference;
     }
-
 }
