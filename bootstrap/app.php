@@ -10,7 +10,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -94,6 +94,22 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (AccessDeniedHttpException $e, Request $request) {
             if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json(['message' => 'Forbidden.'], 403);
+            }
+            return null;
+        });
+
+        // ✅ 429 Too Many Requests (Rate Limiter)
+        $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
+            \Illuminate\Support\Facades\Log::channel('rate_limit')->warning('Rate limit exceeded', [
+                'ip' => $request->ip(),
+                'url' => $request->fullUrl(),
+                'method' => $request->method(),
+                'user_id' => $request->user()?->id,
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return sendResponse(null, 'Demasiadas peticiones. Por favor intente más tarde.', 429);
             }
             return null;
         });
