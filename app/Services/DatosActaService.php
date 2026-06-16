@@ -8,9 +8,15 @@ use App\Http\Resources\EstadosGeneralesResource;
 use App\Http\Resources\InfraccionesResource;
 use App\Http\Resources\InspectorResource;
 use App\Http\Resources\CalleResource;
+use App\Http\Resources\JuezResource;
+use App\Http\Resources\JuzgadosResource;
 use App\Http\Resources\OficinaInternaResource;
+use App\Http\Resources\SecretariaResource;
 use App\Models\Calle;
+use App\Models\Juez;
+use App\Models\Juzgado;
 use App\Models\OficinaInterna;
+use App\Models\Secretaria;
 
 class DatosActaService
 {
@@ -70,6 +76,9 @@ class DatosActaService
             'tipos_infracciones' => EstadosGeneralesResource::collection($estadosAgrupados->get('INFRACCION_TIPO', [])),
             'calles' => CalleResource::collection(Calle::all()),
             'oficinas_internas' => OficinaInternaResource::collection(OficinaInterna::all()),
+            'secretarias' => SecretariaResource::collection(Secretaria::all()),
+            'jueces' => JuezResource::collection(Juez::all()),
+            'juzgados' =>  JuzgadosResource::collection(Juzgado::all()),
             // 'cruces' => CalleResource::collection(Calle::all()),
         ];
     }
