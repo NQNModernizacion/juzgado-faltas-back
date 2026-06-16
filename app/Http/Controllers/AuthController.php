@@ -42,7 +42,7 @@ class AuthController extends Controller
 
     private function expiresAtFromNow(): string
     {
-        return now()->addMinutes($this->tokenExpirationMinutes())->toISOString();
+        return now()->addMinutes($this->tokenExpirationMinutes())->toIso8601String();
     }
 
     public function login(AuthRequest $request)
@@ -70,7 +70,6 @@ class AuthController extends Controller
                 'expires_at' => $this->expiresAtFromNow(),
                 'user' => $this->userPayload($user, $request->type),
             ], null, 200);
-
         } catch (\Throwable $th) {
             saveLog($th, 'error', __FUNCTION__);
 
@@ -103,11 +102,13 @@ class AuthController extends Controller
 
         // Si todavía falta “mucho”, no rotamos (refresh a demanda)
         if ($secondsLeft > $refreshBefore) {
-            return response()->json([
+            return sendResponse([
+                'token_type' => 'Bearer',
+                'user' => $this->userPayload($user, $request->type),
                 'refreshed' => false,
-                'expires_at' => $expiresAt->toISOString(),
+                'expires_at' => $expiresAt->toIso8601String(),
                 'seconds_left' => $secondsLeft,
-            ]);
+            ], null, 200);
         }
 
         // Revocar token actual (Sanctum recomienda borrando tokens) :contentReference[oaicite:10]{index=10}
@@ -121,12 +122,13 @@ class AuthController extends Controller
             ->withProperties(['device_name' => $deviceName, 'ip' => $request->ip()])
             ->log('refresh');
 
-        return response()->json([
-            'refreshed' => true,
+        return sendResponse([
             'token_type' => 'Bearer',
-            'access_token' => $plain,
+            'token' => $plain,
             'expires_at' => $this->expiresAtFromNow(),
-        ]);
+            'user' => $this->userPayload($user, $request->type),
+            'refreshed' => true,
+        ], null, 200);
     }
 
     public function logout(Request $request)
