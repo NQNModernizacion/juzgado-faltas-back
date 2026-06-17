@@ -64,6 +64,9 @@ class StoreActaRequest extends FormRequest
             'inspector_1_id' => ['nullable', 'integer', 'exists:inspectores,id'],
             'inspector_2_id' => ['nullable', 'integer', 'exists:inspectores,id'],
 
+            'juez_subrogante_id' => ['nullable', 'exists:juez,id'],
+            'secretaria_subrogante_id' => ['nullable', 'exists:secretarias,id'],
+
             'infracciones' => ['nullable', 'array'],
             'infracciones.*.infraccion_id' => ['required', 'exists:infracciones,id'],
             'infracciones.*.fecha_infraccion' => ['nullable', 'date'],

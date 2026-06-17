@@ -47,6 +47,19 @@ class ActaController extends Controller
         }
     }
 
+    public function update(UpdateActaRequest $request, $id)
+    {
+        try {
+            $acta = $this->actaService->actualizarActa($id, $request->validated());
+
+            return sendResponse(new ActaResource($acta->load('grupo', 'padrones', 'infractores', 'infracciones')));
+        } catch (\DomainException $e) {
+            return sendResponse(null, ['general' => $e->getMessage()], 422);
+        } catch (\Throwable $e) {
+            return error_response($e, __FUNCTION__);
+        }
+    }
+
     public function show($id)
     {
         try {

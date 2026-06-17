@@ -38,6 +38,8 @@ class Acta extends Model
         "numero_juzgado_id",
         "secretaria_id",
         "juez_id",
+        "juez_subrogante_id",
+        "secretaria_subrogante_id",
         "causa_id_padre",
         "fecha_vinculacion_padre",
         "caratula",
@@ -178,9 +180,17 @@ class Acta extends Model
     {
         return $this->belongsTo(Juez::class, 'juez_id');
     }
+    public function juezSubrogante()
+    {
+        return $this->belongsTo(Juez::class, 'juez_subrogante_id');
+    }
     public function secretaria()
     {
         return $this->belongsTo(Secretaria::class, 'secretaria_id');
+    }
+    public function secretariaSubrogante()
+    {
+        return $this->belongsTo(Secretaria::class, 'secretaria_subrogante_id');
     }
 
     public function oficina()

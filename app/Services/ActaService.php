@@ -55,6 +55,55 @@ class ActaService
     }
 
     /**
+     * Actualiza un acta existente y sincroniza sus relaciones.
+     *
+     * @param int $id
+     * @param array $data
+     * @return Acta
+     */
+    public function actualizarActa(int $id, array $data): Acta
+    {
+        return DB::transaction(function () use ($id, $data) {
+            try {
+                $acta = Acta::findOrFail($id);
+
+                if (isset($data['grupo_acta_id'])) {
+                    $data['grupo_acta_id'] = $this->grupoService->resolverGrupoActaId($data['grupo_acta_id']);
+                }
+
+                // Asegurar limpieza si el key viene explícitamente en null
+                if (array_key_exists('juez_subrogante_id', $data) && is_null($data['juez_subrogante_id'])) {
+                    $data['juez_subrogante_id'] = null;
+                }
+                if (array_key_exists('secretaria_subrogante_id', $data) && is_null($data['secretaria_subrogante_id'])) {
+                    $data['secretaria_subrogante_id'] = null;
+                }
+
+                $acta->update($data);
+
+                // Reutilizamos los métodos que hacen "sync()", los cuales automáticamente
+                // añaden los nuevos, actualizan los modificados y quitan de la relación 
+                // a los que ya no están en el array (sin borrarlos de la tabla maestra).
+                if (isset($data['padrones'])) {
+                    $this->padronService->procesarPadrones($data['padrones'], $acta);
+                }
+                if (isset($data['infractores'])) {
+                    $this->infractorService->procesarInfractores($data['infractores'], $acta);
+                }
+                if (isset($data['infracciones'])) {
+                    $this->procesarInfracciones($data['infracciones'], $acta);
+                }
+
+                return $acta;
+            } catch (\DomainException $e) {
+                throw $e;
+            } catch (\Throwable $e) {
+                throw $e;
+            }
+        });
+    }
+
+    /**
      * Procesa las infracciones asociadas al acta.
      *
      * @param array $infraccionesData

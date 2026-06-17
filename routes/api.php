@@ -48,6 +48,7 @@ Route::post('agregar_a_grupo', [GrupoActaController::class, 'añadirAGrupo']);
 Route::post('desagrupar_actas', [GrupoActaController::class, 'desagrupar']);
 Route::get('actas', [ActaController::class, 'index'])->name('actas.index');
 Route::get('actas/{id}', [ActaController::class, 'show'])->name('actas.show');
+Route::put('actas/{id}', [ActaController::class, 'update'])->name('actas.update');
 Route::get('grupos_actas', [GrupoActaController::class, 'index']);
 Route::get('grupos_actas/{id}', [GrupoActaController::class, 'show'])->name('grupos_actas.show');
 Route::get('grupos_de_acta/{acta_id}', [GrupoActaController::class, 'grupo_por_acta'])->name('grupo_de_acta');
