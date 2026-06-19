@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Strategies\Auth\Strategies\AuthStrategyResolver;
 use App\Http\Requests\AuthRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -63,7 +64,9 @@ class AuthController extends Controller
                 ?? substr(($request->userAgent() ?: 'api-device'), 0, 255);
 
             $token = $user->createToken($deviceName)->plainTextToken;
-
+            if ($request->type != 'internal') {
+                register_app_income(Auth::user()->id, $request);
+            }
             return sendResponse([
                 'token_type' => 'Bearer',
                 'token' => $token,
