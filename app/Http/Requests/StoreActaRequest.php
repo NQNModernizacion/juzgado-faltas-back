@@ -16,14 +16,14 @@ class StoreActaRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'desestimada' => $this->has('desestimada')
-                ? filter_var($this->desestimada, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)
-                : null,
-        ]);
-    }
+    // protected function prepareForValidation(): void
+    // {
+    //     $this->merge([
+    //         'desestimada' => $this->has('desestimada')
+    //             ? filter_var($this->desestimada, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)
+    //             : null,
+    //     ]);
+    // }
 
     public function rules(): array
     {
@@ -58,8 +58,8 @@ class StoreActaRequest extends FormRequest
             'estado_acta_id' => ['nullable', 'exists:estados_generales,id'],
             'fecha_estado' => ['nullable', 'date'],
 
-            'desestimada' => ['nullable', 'boolean'],
-            'fecha_notificado' => ['nullable', 'date'],
+            // 'desestimada' => ['nullable', 'boolean'],
+            // 'fecha_notificado' => ['nullable', 'date'],
 
             'inspector_1_id' => ['nullable', 'integer', 'exists:inspectores,id'],
             'inspector_2_id' => ['nullable', 'integer', 'exists:inspectores,id'],
@@ -88,15 +88,17 @@ class StoreActaRequest extends FormRequest
             'infractores.*.tipo_id' => ['required', Rule::exists('estados_generales', 'id')->where(function ($query) {
                 return $query->where('label', 'DOCUMENTO_TIPO');
             })],
-            'infractores.*.identificacion' => ['required', 'string'],
+            // 'infractores.*.identificacion' => ['required', 'string'],
             'infractores.*.documento' => ['required', 'string'],
             'infractores.*.nombre' => ['required', 'string'],
             'infractores.*.domicilio' => ['nullable', 'string'],
+            'infractores.*.observacion' => ['nullable', 'string'],
             'infractores.*.categoria_infractor_id' => ['nullable', 'integer', Rule::exists('estados_generales', 'id')->where(function ($query) {
                 return $query->where('label', 'CATEGORIA_INFRACTOR');
             })],
             'caratula' => ['required', 'string'],
             'color' => ['required', 'string'],
+            'observacion' => ['required', 'string'],
         ];
     }
 
@@ -166,9 +168,9 @@ class StoreActaRequest extends FormRequest
             'estado_acta_id.exists' => 'El estado del acta seleccionado no existe.',
             'fecha_estado.date' => 'La fecha de estado debe tener una fecha válida.',
 
-            'desestimada.boolean' => 'El campo desestimada debe ser verdadero o falso.',
+            // 'desestimada.boolean' => 'El campo desestimada debe ser verdadero o falso.',
 
-            'fecha_notificado.date' => 'La fecha de notificación debe tener una fecha válida.',
+            // 'fecha_notificado.date' => 'La fecha de notificación debe tener una fecha válida.',
 
             'inspector_1_id.integer' => 'El inspector 1 debe ser un número válido.',
             'inspector_1_id.exists' => 'El inspector 1 seleccionado no existe.',
@@ -189,6 +191,8 @@ class StoreActaRequest extends FormRequest
             'caratula.string' => 'La caratula debe ser una cadena de texto.',
             'color.required' => 'El color es obligatorio.',
             'color.string' => 'El color debe ser una cadena de texto.',
+            'observacion.required' => 'La observacion es obligatoria.',
+            'observacion.string' => 'La observacion debe ser una cadena de texto.',
         ];
     }
 }

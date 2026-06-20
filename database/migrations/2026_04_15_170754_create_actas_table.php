@@ -36,11 +36,11 @@ return new class extends Migration
             $table->foreignId('estado_acta_id')->nullable()->constrained('estados_generales', 'id')->onDelete('set null');
             $table->dateTime('fecha_estado')->nullable();
 
-            $table->boolean('desestimada')->nullable();
+            $table->boolean('desestimada')->nullable(); // QUITAR
             // $table->foreignId('motivo_desestimado_id')->nullable()->constrained('estados_generales', 'id', "motivo_desestimado")->onDelete('set null');
 
             // $table->foreignId('grado_acta_id')->nullable()->constrained('estados_generales', 'id', "grado_acta")->onDelete('set null');
-            $table->dateTime('fecha_notificado')->nullable();
+            $table->dateTime('fecha_notificado')->nullable(); // QUITAR
 
             $table->foreignId('inspector_1_id')->nullable()->constrained('inspectores', 'id')->onDelete('set null');
             $table->foreignId('inspector_2_id')->nullable()->constrained('inspectores', 'id')->onDelete('set null');

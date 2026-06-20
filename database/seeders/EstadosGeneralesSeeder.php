@@ -13,7 +13,7 @@ class EstadosGeneralesSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        // 'deleted_at' => Carbon::now()->format('Y-m-d H:i:s')
         $estados = [
 
 
@@ -32,15 +32,30 @@ class EstadosGeneralesSeeder extends Seeder
             ["label" => "sub_tipo", "nombre" => "Centro Carga Actas", "value" => "CCA",    "descripcion" => "Centro Carga Actas"],
             ["label" => "sub_tipo", "nombre" => "Tribunal de faltas", "value" => "Tribunal ",    "descripcion" => "Tribunal de faltas"],
             /* Ley */
-            ["label" => "ley", "nombre" => null, "value" => 0,    "descripcion" => null],
-            ["label" => "ley", "nombre" => "Ord 8833", "value" => 1,    "descripcion" => "Ord 8833"],
+            // ["label" => "ley", "nombre" => null, "value" => 0,    "descripcion" => null],
+            // ["label" => "ley", "nombre" => "Ord 8833", "value" => 1,    "descripcion" => "Ord 8833"],
             ["label" => "ley", "nombre" => "Ley 12028", "value" => 2,    "descripcion" => "Ley 12028"],
 
             /* Estados */
-            ["label" => "estado", "nombre" => "Baja", "value" => "BA",    "descripcion" => "Baja"],
-            ["label" => "estado", "nombre" => "Género Causa", "value" => "C",    "descripcion" => "Género Causa"],
-            ["label" => "estado", "nombre" => "Notificado", "value" => "NOT",    "descripcion" => "Notificado"],
-            ["label" => "estado", "nombre" => "Sin Datos", "value" => "SD",    "descripcion" => "Sin Datos"],
+            // ["label" => "estado", "nombre" => "Baja", "value" => "BA",    "descripcion" => "Baja"],
+            // ["label" => "estado", "nombre" => "Género Causa", "value" => "C",    "descripcion" => "Género Causa"],
+            // ["label" => "estado", "nombre" => "Notificado", "value" => "NOT",    "descripcion" => "Notificado"],
+            // ["label" => "estado", "nombre" => "Sin Datos", "value" => "SD",    "descripcion" => "Sin Datos"],
+            // FIRMO?
+            // INTERVENCIÓN?
+            // SECUESTRO?
+            // CLAUSURA?
+            // P. MORDEDOR?
+            // RETUVO LICENCIA?
+            // INHABILITACIÓN?
+
+            ["label" => "estado", "nombre" => "FIRMO", "value" => "F",    "descripcion" => "FIRMO"],
+            ["label" => "estado", "nombre" => "INTERVENCION", "value" => "I",    "descripcion" => "INTERVENCION"],
+            ["label" => "estado", "nombre" => "SECUESTRO", "value" => "S",    "descripcion" => "SECUESTRO"],
+            ["label" => "estado", "nombre" => "CLAUSURA", "value" => "C",    "descripcion" => "CLAUSURA"],
+            ["label" => "estado", "nombre" => "P. MORDEDOR", "value" => "P",    "descripcion" => "P. MORDEDOR"],
+            ["label" => "estado", "nombre" => "RETUVO LICENCIA", "value" => "R",    "descripcion" => "RETUVO LICENCIA"],
+            ["label" => "estado", "nombre" => "INHABILITACIÓN", "value" => "H",    "descripcion" => "INHABILITACIÓN"],
 
             /*Grado Infraccion */
             ["label" => "INFRACCION_GRADO", "nombre" => "0 - Grado 0", "value" => "0",    "descripcion" => "0 - Grado 0"],
@@ -78,8 +93,14 @@ class EstadosGeneralesSeeder extends Seeder
             ["label" => "CATEGORIA_INFRACTOR", "nombre" => "Atendido", "value" => "6",    "descripcion" => "Atendido"],
 
             /* categoria padron */
+            // moto, auto, camión, cuatriciclo, casa rodante
             ["label" => "CATEGORIA_PADRON", "nombre" => "Camión", "value" => "1",    "descripcion" => "Camión"],
             ["label" => "CATEGORIA_PADRON", "nombre" => "Semirremolque", "value" => "2",    "descripcion" => "Semirremolque"],
+            ["label" => "CATEGORIA_PADRON", "nombre" => "Auto", "value" => "3",    "descripcion" => "Auto"],
+            ["label" => "CATEGORIA_PADRON", "nombre" => "Moto", "value" => "4",    "descripcion" => "Moto"],
+            ["label" => "CATEGORIA_PADRON", "nombre" => "Cuatriciclo", "value" => "5",    "descripcion" => "Cuatriciclo"],
+            ["label" => "CATEGORIA_PADRON", "nombre" => "Casa rodante", "value" => "6",    "descripcion" => "Casa rodante"],
+
             /* 
             DOM_DOCUMENTO_TIPO	CUIL		7	CLAVE UNICA DE IDENTIFICACION LABORAL
             DOM_DOCUMENTO_TIPO	CUIT		6	CLAVE UNICA DE IDENTIFICACION TRIBUTARIA

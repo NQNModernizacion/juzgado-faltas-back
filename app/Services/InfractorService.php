@@ -21,10 +21,9 @@ class InfractorService
             $infractor = Infractor::updateOrCreate(
                 [
                     'tipo_id' => $infractorData['tipo_id'],
-                    'identificacion' => $infractorData['identificacion']
+                    'documento' => $infractorData['documento'],
                 ],
                 [
-                    'documento' => $infractorData['documento'],
                     'nombre' => $infractorData['nombre'],
                     'domicilio' => $infractorData['domicilio'] ?? null
                 ]
@@ -32,10 +31,10 @@ class InfractorService
             $infractorIds[] = [
                 "infractor_id" => $infractor->id,
                 "categoria_infractor_id" => $infractorData['categoria_infractor_id'] ?? null,
-                "observaciones" => $infractorData['observaciones'] ?? null
+                "observaciones" => $infractorData['observacion'] ?? null
             ];
         }
-        
+
         $acta->syncInfractoresConLog($infractorIds);
     }
 }

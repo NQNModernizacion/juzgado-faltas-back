@@ -55,3 +55,4 @@ Route::get('grupos_de_acta/{acta_id}', [GrupoActaController::class, 'grupo_por_a
 Route::post('mover_causa', [MovimientoController::class, 'moverCausa']);
 Route::get('actas/{id}/movimientos', [MovimientoController::class, 'getByActa']);
 Route::get('consultar_padron', [PadronController::class, 'consultar']);
+Route::get('consultar_imputado', [InfractorController::class, 'consultarImputado']);
