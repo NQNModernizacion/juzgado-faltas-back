@@ -252,3 +252,17 @@ if (!function_exists('consultar_aut_externo')) {
         }
     }
 }
+
+if (!function_exists('register_app_income')) {
+    function register_app_income($userID, $request)
+    {
+        $url = env('BASE_ADMIN_URL') . 'api/ingreso_aplicacion';
+
+        $response = (object) Http::withoutVerifying()->post($url, [
+            'user_id' => $userID,
+            'app_name' => $request->app_name,
+        ])->json();
+
+        return true;
+    }
+}

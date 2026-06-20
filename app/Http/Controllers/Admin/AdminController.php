@@ -30,15 +30,6 @@ class AdminController extends Controller
             'token_name' => method_exists($u, 'currentAccessToken') ? ($u?->currentAccessToken()?->name) : null,
         ]);
 
-        if (!$u || !$u->hasPermissionTo('admin.permission.view', 'sanctum')) {
-            Log::info('[admin.bootstrap] perm-debug', [
-                'hasPermissionTo' => $u ? $u->hasPermissionTo('admin.permission.view', 'sanctum') : null,
-                'roles' => $u?->getRoleNames()?->values()?->all() ?? [],
-                'permissions_all' => $u?->getAllPermissions()?->pluck('name')?->values()?->all() ?? [],
-            ]);
-            abort(403);
-        }
-
         return response()->json([
             'data' => [
                 'roles' => Role::query()
@@ -312,5 +303,71 @@ class AdminController extends Controller
                 ],
             ],
         ], 200);
+    public function getRateLimitDates(Request $request)
+    {
+        $files = \Illuminate\Support\Facades\File::files(storage_path('logs'));
+        $dates = [];
+        
+        foreach ($files as $file) {
+            if (preg_match('/rate_limit-(\d{4}-\d{2}-\d{2})\.log/', $file->getFilename(), $matches)) {
+                $dates[] = $matches[1];
+            }
+        }
+        
+        rsort($dates);
+        return sendResponse($dates, null, 200);
+    }
+
+    public function getRateLimitLogs(Request $request)
+    {
+        $limit = (int) $request->input('limit', 100);
+        $date = $request->input('date', now()->format('Y-m-d'));
+        
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            return sendResponse(null, 'Debe proveer una fecha válida (YYYY-MM-DD)', 422);
+        }
+
+        $path = storage_path("logs/rate_limit-{$date}.log");
+
+        if (!\Illuminate\Support\Facades\File::exists($path)) {
+            return sendResponse([], null, 200);
+        }
+
+        $lines = [];
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            exec('powershell -command "Get-Content ' . escapeshellarg($path) . ' -Tail ' . $limit . '"', $lines);
+        } else {
+            exec("tail -n {$limit} " . escapeshellarg($path), $lines);
+        }
+
+        // Tail devuelve en el mismo orden del archivo, los damos vuelta para ver los más nuevos arriba
+        $lines = array_reverse($lines);
+        
+        $logs = [];
+        foreach ($lines as $line) {
+            $data = json_decode($line, true);
+            if ($data) {
+                $logs[] = $data;
+            }
+        }
+
+        return sendResponse($logs, null, 200);
+    }
+
+    public function deleteRateLimitLog(Request $request)
+    {
+        $date = $request->input('date');
+        
+        if (!$date || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            return sendResponse(null, 'Debe proveer una fecha válida (YYYY-MM-DD)', 422);
+        }
+
+        $path = storage_path("logs/rate_limit-{$date}.log");
+
+        if (\Illuminate\Support\Facades\File::exists($path)) {
+            \Illuminate\Support\Facades\File::delete($path);
+        }
+
+        return sendResponse(['message' => "El log del día {$date} ha sido eliminado."], null, 200);
     }
 }

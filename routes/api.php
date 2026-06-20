@@ -26,7 +26,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
-    Route::get('bootstrap', [AdminController::class, 'index']);
+    Route::get('bootstrap', [AdminController::class, 'index'])->middleware('permission:admin.permission.view,sanctum');
+
+    // Logs de Rate Limit
+    Route::middleware('permission:admin.permission.view,sanctum')->group(function () {
+        Route::get('logs/rate-limit/dates', [AdminController::class, 'getRateLimitDates']);
+        Route::get('logs/rate-limit', [AdminController::class, 'getRateLimitLogs']);
+        Route::delete('logs/rate-limit', [AdminController::class, 'deleteRateLimitLog']);
+    });
+
     Route::get('get_person_info/{dni}', [AdminController::class, 'getPersonInfoByDni']);
     Route::post('users/{user}/sync-roles', [AdminController::class, 'syncRoles']);
     Route::post('roles/{role}/sync-permissions', [AdminController::class, 'syncRolePermissions']);
