@@ -8,8 +8,12 @@ use App\Http\Controllers\GrupoActaController;
 use App\Http\Controllers\MovimientoController;
 use App\Http\Controllers\PDFController;
 use App\Http\Controllers\PadronController;
+use App\Http\Controllers\DocumentoLegalController;
+use App\Http\Controllers\InfractorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PlantillaDocumentoController;
+
 
 /* Route::get('/user', function (Request $request) {
     return $request->user();
@@ -64,3 +68,14 @@ Route::post('mover_causa', [MovimientoController::class, 'moverCausa']);
 Route::get('actas/{id}/movimientos', [MovimientoController::class, 'getByActa']);
 Route::get('consultar_padron', [PadronController::class, 'consultar']);
 Route::get('consultar_imputado', [InfractorController::class, 'consultarImputado']);
+
+// Rutas de Documentos Legales
+Route::apiResource('documentos', DocumentoLegalController::class);
+Route::get('documentos/{id}/pdf', [DocumentoLegalController::class, 'generarPdf']);
+
+// Rutas de Plantillas de Documentos
+Route::get('plantillas', [PlantillaDocumentoController::class, 'index']);
+Route::post('plantillas', [PlantillaDocumentoController::class, 'store']);
+Route::get('plantillas/{id}', [PlantillaDocumentoController::class, 'show']);
+Route::put('plantillas/{id}', [PlantillaDocumentoController::class, 'update']);
+Route::delete('plantillas/{id}', [PlantillaDocumentoController::class, 'destroy']);
