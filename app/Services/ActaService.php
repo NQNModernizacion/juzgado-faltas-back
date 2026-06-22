@@ -163,7 +163,7 @@ class ActaService
             'juez_id' => $juez->id,
             'estado_causa_id' => 1,
             'fecha_estado_causa' => Carbon::now()->format('Y-m-d'),
-            'fecha_notificado_causa' => $data['fecha_notificado'],
+            // 'fecha_notificado_causa' => $data['fecha_notificado'],
         ];
     }
 
