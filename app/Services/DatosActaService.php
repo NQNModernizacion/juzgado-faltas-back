@@ -65,7 +65,8 @@ class DatosActaService
             'sub_tipos' => EstadosGeneralesResource::collection($estadosAgrupados->get('sub_tipo', [])),
             'leyes' => EstadosGeneralesResource::collection($estadosAgrupados->get('ley', [])),
             'infractores' => [
-                "tipo" => EstadosGeneralesResource::collection($estadosAgrupados->get('DOCUMENTO_TIPO', []))
+                "tipo" => EstadosGeneralesResource::collection($estadosAgrupados->get('DOCUMENTO_TIPO', [])),
+                'categoria_infractor' =>  EstadosGeneralesResource::collection($estadosAgrupados->get('CATEGORIA_INFRACTOR', [])),
             ],
             'padrones' => [
                 'tipo_padron' => EstadosGeneralesResource::collection($estadosAgrupados->get('TIPO_PADRON', [])),
@@ -79,7 +80,6 @@ class DatosActaService
             'secretarias' => SecretariaResource::collection(Secretaria::all()),
             'jueces' => JuezResource::collection(Juez::all()),
             'juzgados' =>  JuzgadosResource::collection(Juzgado::all()),
-            'categoria_infractor' =>  EstadosGeneralesResource::collection($estadosAgrupados->get('CATEGORIA_INFRACTOR', [])),
             'estado_acta' =>  EstadosGeneralesResource::collection($estadosAgrupados->get('estado', [])),
             // 'cruces' => CalleResource::collection(Calle::all()),
         ];
