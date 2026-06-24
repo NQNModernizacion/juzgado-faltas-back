@@ -72,8 +72,12 @@ class ActaResource extends JsonResource
 
             // Relaciones cargadas
             'grupo' => $this->whenLoaded('grupo'),
-            'padrones' => $this->whenLoaded('padrones'),
-            'infractores' => $this->whenLoaded('infractores'),
+            'padrones' => $this->whenLoaded('padrones', function () {
+                return PadronResource::collection($this->padrones);
+            }),
+            'infractores' => $this->whenLoaded('infractores', function () {
+                return InfractorResource::collection($this->infractores);
+            }),
 
             'infracciones' => $this->whenLoaded('infracciones', function () {
                 return InfraccionesResource::collection($this->infracciones);
