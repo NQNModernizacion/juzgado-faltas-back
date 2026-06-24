@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('actas', function (Blueprint $table) {
-            $table->foreignId('juez_subrogante_id')->nullable()->constrained('juez', 'id')->onDelete('set null');
-            $table->foreignId('secretaria_subrogante_id')->nullable()->constrained('secretarias', 'id')->onDelete('set null');
+            $table->foreignId('juez_subrogante_id')->nullable()->constrained('juez', 'id')->onDelete('set null')->after('juez_id');
+            $table->foreignId('secretaria_subrogante_id')->nullable()->constrained('secretarias', 'id')->onDelete('set null')->after('juez_subrogante_id');
         });
     }
 
