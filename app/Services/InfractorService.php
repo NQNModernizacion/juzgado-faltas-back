@@ -31,7 +31,7 @@ class InfractorService
             $infractorIds[] = [
                 "infractor_id" => $infractor->id,
                 "categoria_infractor_id" => $infractorData['categoria_infractor_id'] ?? null,
-                "observaciones" => $infractorData['observacion'] ?? null
+                "observaciones" => $infractorData['observaciones'] ?? null
             ];
         }
 
