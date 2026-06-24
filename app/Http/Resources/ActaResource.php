@@ -61,6 +61,14 @@ class ActaResource extends JsonResource
             'secretaria' => $this->whenLoaded('secretaria', function () {
                 return new SecretariaResource($this->secretaria);
             }),
+            'juez_subrogante_id' => $this->juez_subrogante_id,
+            'juez_subrogante' => $this->whenLoaded('juez_subrogante', function () {
+                return new JuezResource($this->juez_subrogante);
+            }),
+            'secretaria_subrogante_id' => $this->secretaria_subrogante_id,
+            'secretaria_subrogante' => $this->whenLoaded('secretaria_subrogante', function () {
+                return new SecretariaResource($this->secretaria);
+            }),
             'causa_id_padre' => $this->causa_id_padre,
             'fecha_vinculacion_padre' => $this->fecha_vinculacion_padre,
             'caratula' => $this->caratula,
