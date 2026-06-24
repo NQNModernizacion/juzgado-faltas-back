@@ -92,7 +92,7 @@ class StoreActaRequest extends FormRequest
             'infractores.*.documento' => ['required', 'string'],
             'infractores.*.nombre' => ['required', 'string'],
             'infractores.*.domicilio' => ['nullable', 'string'],
-            'infractores.*.observacion' => ['nullable', 'string'],
+            'infractores.*.observaciones' => ['nullable', 'string'],
             'infractores.*.categoria_infractor_id' => ['nullable', 'integer', Rule::exists('estados_generales', 'id')->where(function ($query) {
                 return $query->where('label', 'CATEGORIA_INFRACTOR');
             })],
