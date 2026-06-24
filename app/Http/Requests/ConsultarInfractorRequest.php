@@ -24,7 +24,7 @@ class ConsultarInfractorRequest extends FormRequest
                 'required',
                 'string',
                 Rule::in(['CUIL', 'CUIT', 'CI', 'LC', 'LE', 'PAS', 'CF', 'DNI', 'OT', 'EXT']),
-                Rule::exists('estados_generales', 'value')->where(function ($query) {
+                Rule::exists('estados_generales', 'nombre')->where(function ($query) {
                     return $query->where('label', 'DOCUMENTO_TIPO');
                 })
             ],
