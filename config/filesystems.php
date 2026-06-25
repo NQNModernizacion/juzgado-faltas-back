@@ -62,10 +62,12 @@ return [
         'serverdata' => [
             'driver' => 'local',
             'root' => empty(env('STORAGE_PATH')) ? storage_path('app') : env('STORAGE_PATH'),
+            'throw' => true,
         ],
         'serverdata_replica' => [
             'driver' => 'local',
             'root' => empty(env('STORAGE_PATH_REPLICA')) ? storage_path('app/replica') : env('STORAGE_PATH_REPLICA'),
+            'throw' => true,
         ],
 
     ],

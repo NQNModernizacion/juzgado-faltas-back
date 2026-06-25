@@ -74,9 +74,7 @@ class AuthController extends Controller
                 'user' => $this->userPayload($user, $request->type),
             ], null, 200);
         } catch (\Throwable $th) {
-            saveLog($th, 'error', __FUNCTION__);
-
-            return sendResponse(null, $th->getMessage(), 490);
+            return error_response($th, __FUNCTION__, 490);
         }
     }
 
@@ -84,7 +82,7 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        return response()->json([
+        return sendResponse([
             'id' => $user->id,
             'email' => $user->email,
             'roles' => $user->getRoleNames(),
@@ -146,6 +144,6 @@ class AuthController extends Controller
             ->withProperties(['ip' => $request->ip()])
             ->log('logout');
 
-        return response()->json(['ok' => true]);
+        return sendResponse(['ok' => true]);
     }
 }

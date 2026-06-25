@@ -178,35 +178,72 @@ if (!function_exists('enviarEmail')) {
 }
 
 if (!function_exists('storage_file')) {
-    function storage_file($file, string $folder = ''): string
+    function storage_file($file, string $folder = ''): ?string
     {
-        $path = Storage::disk('serverdata')->put($folder, $file);
+        try {
+            $path = Storage::disk('serverdata')->put($folder, $file);
 
-        return $path;
+            if ($path === false || empty($path)) {
+                throw new \RuntimeException("El disco devolvió false. No se pudo escribir el archivo físico (posible falta de espacio o permisos).");
+            }
+
+            return $path;
+        } catch (\Throwable $e) {
+            //guardar en el log fisico (storage/logs/laravel.log)
+            \Illuminate\Support\Facades\Log::error('Fallo al guardar archivo físico en storage_file', [
+                'error' => $e->getMessage(),
+                'folder' => $folder,
+                // Usamos hashName o el nombre original si es un UploadedFile
+                'file_info' => is_object($file) && method_exists($file, 'getClientOriginalName') ? $file->getClientOriginalName() : 'Archivo desconocido'
+            ]);
+
+            //enviar la alerta a Discord + Actividad BD
+            ErrorLogService::handle($e, 'Guardado de Archivos (storage_file)');
+
+            return null;
+        }
     }
 }
 
 if (!function_exists('get_file')) {
     function get_file(string $path)
     {
-        /* Obtenemos el parth del archivo para luego obtener toda la informacion del archivo */
-        $fullPath = Storage::disk('serverdata')->path($path);
-        $fileInfo = new File($fullPath);
-        $type = $fileInfo->getExtension();
-        $type_format = 'image';
-        if ($type === 'pdf') {
-            $type_format = 'application';
+        try {
+            /* Obtenemos el parth del archivo para luego obtener toda la informacion del archivo */
+            $fullPath = Storage::disk('serverdata')->path($path);
+
+            if (!file_exists($fullPath)) {
+                throw new \RuntimeException("El archivo físico no existe o fue borrado: {$fullPath}");
+            }
+
+            $fileInfo = new File($fullPath);
+            $type = $fileInfo->getExtension();
+            $type_format = 'image';
+            if ($type === 'pdf') {
+                $type_format = 'application';
+            }
+
+            return [
+                'type' => $type,
+                'file_name' => $fileInfo->getFilename(),
+                'size' => $fileInfo->getSize(),
+
+                /* Enviamos el archivo como base64 */
+                'file' => "data:{$type_format}/" . $type . ';base64,' . base64_encode($fileInfo->getContent()),
+
+            ];
+        } catch (\Throwable $e) {
+            // 1. Guardar en el log físico
+            \Illuminate\Support\Facades\Log::error('Fallo al obtener o leer archivo físico en get_file', [
+                'error' => $e->getMessage(),
+                'path_solicitado' => $path
+            ]);
+
+            // 2. Enviar alerta a Discord + Actividad BD
+            ErrorLogService::handle($e, 'Lectura de Archivos (get_file)');
+
+            return null;
         }
-
-        return [
-            'type' => $type,
-            'file_name' => $fileInfo->getFilename(),
-            'size' => $fileInfo->getSize(),
-
-            /* Enviamos el archivo como base64 */
-            'file' => "data:{$type_format}/" . $type . ';base64,' . base64_encode($fileInfo->getContent()),
-
-        ];
     }
 }
 
