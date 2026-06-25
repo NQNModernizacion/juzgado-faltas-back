@@ -183,7 +183,7 @@ if (!function_exists('storage_file')) {
         try {
             $path = Storage::disk('serverdata')->put($folder, $file);
 
-            if ($path === false) {
+            if ($path === false || empty($path)) {
                 throw new \RuntimeException("El disco devolvió false. No se pudo escribir el archivo físico (posible falta de espacio o permisos).");
             }
 
