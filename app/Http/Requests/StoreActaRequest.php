@@ -68,31 +68,34 @@ class StoreActaRequest extends FormRequest
             'secretaria_subrogante_id' => ['nullable', 'exists:secretarias,id'],
 
             'infracciones' => ['nullable', 'array'],
-            'infracciones.*.infraccion_id' => ['required', 'exists:infracciones,id'],
+            'infracciones.*.infraccion_id' => ['required', 'integer', 'exists:infracciones,id'],
             'infracciones.*.fecha_infraccion' => ['nullable', 'date'],
             'infracciones.*.lugar' => ['nullable', 'string', 'max:255'],
 
             'padrones' => ['required', 'array'],
-            'padrones.*.tipo_id' => ['required', Rule::exists('estados_generales', 'id')->where(function ($query) {
+            'padrones.*.tipo_id' => ['required', 'integer', Rule::exists('estados_generales', 'id')->where(function ($query) {
                 return $query->where('label', 'TIPO_PADRON');
             })],
             'padrones.*.identificacion' => ['required', 'string'],
             'padrones.*.nombre' => ['required', 'string'],
             'padrones.*.categoria_padron_id' => [
                 'nullable',
+                'integer',
                 Rule::exists('estados_generales', 'id')->where(function ($query) {
                     return $query->where('label', 'CATEGORIA_PADRON');
                 })
             ],
+            'padrones.*.observaciones' => ['nullable', 'string', 'max:255'],
+
             'infractores' => ['required', 'array'],
-            'infractores.*.tipo_id' => ['required', Rule::exists('estados_generales', 'id')->where(function ($query) {
+            'infractores.*.tipo_id' => ['required', 'integer', Rule::exists('estados_generales', 'id')->where(function ($query) {
                 return $query->where('label', 'DOCUMENTO_TIPO');
             })],
             // 'infractores.*.identificacion' => ['required', 'string'],
             'infractores.*.documento' => ['required', 'string'],
             'infractores.*.nombre' => ['required', 'string'],
             'infractores.*.domicilio' => ['nullable', 'string'],
-            'infractores.*.observaciones' => ['nullable', 'string'],
+            'infractores.*.observaciones' => ['nullable', 'string', 'max:255'],
             'infractores.*.categoria_infractor_id' => ['nullable', 'integer', Rule::exists('estados_generales', 'id')->where(function ($query) {
                 return $query->where('label', 'CATEGORIA_INFRACTOR');
             })],
@@ -178,20 +181,18 @@ class StoreActaRequest extends FormRequest
             'inspector_2_id.integer' => 'El inspector 2 debe ser un número válido.',
             'inspector_2_id.exists' => 'El inspector 2 seleccionado no existe.',
 
+            'juez_subrogante_id.exists' => 'El juez subrogante seleccionado no existe.',
+            'secretaria_subrogante_id.exists' => 'La secretaria subrogante seleccionada no existe.',
+
             'infracciones.array' => 'El campo infracciones debe ser un arreglo.',
             'infracciones.*.infraccion_id.required' => 'El ID de la infracción es obligatorio.',
             'infracciones.*.infraccion_id.integer' => 'El ID de la infracción debe ser un número entero.',
             'infracciones.*.infraccion_id.exists' => 'La infracción seleccionada no existe.',
-            'infracciones.*.fecha_infraccion.required' => 'La fecha de la infracción es obligatoria.',
             'infracciones.*.fecha_infraccion.date' => 'La fecha de la infracción debe ser una fecha válida.',
             'infracciones.*.lugar.string' => 'El lugar de la infracción debe ser una cadena de texto.',
             'infracciones.*.lugar.max' => 'El lugar de la infracción no puede superar los 255 caracteres.',
 
             'infractores.array' => 'El campo infractores debe ser un arreglo.',
-            'infractores.*.id.required' => 'El ID del infractor es obligatorio.',
-            'infractores.*.id.integer' => 'El ID del infractor debe ser un número entero.',
-            'infractores.*.id.exists' => 'El infractor seleccionado no existe.',
-            'infractores.*.categoria_infractor_id.required' => 'La categoría del infractor es obligatoria.',
             'infractores.*.categoria_infractor_id.integer' => 'La categoría del infractor debe ser un número entero.',
             'infractores.*.categoria_infractor_id.exists' => 'La categoría del infractor seleccionada no existe.',
             'infractores.*.observaciones.string' => 'Las observaciones deben ser una cadena de texto.',
@@ -199,12 +200,17 @@ class StoreActaRequest extends FormRequest
             'infractores.*.tipo_id.required' => 'El tipo de imputado es obligatorio.',
             'infractores.*.tipo_id.integer' => 'El tipo de imputado debe ser un número entero.',
             'infractores.*.tipo_id.exists' => 'El tipo de imputado seleccionado no existe.',
+            'infractores.*.documento.required' => 'El documento es obligatorio.',
+            'infractores.*.documento.string' => 'El documento debe ser una cadena de texto.',
+            'infractores.*.nombre.required' => 'El nombre es obligatorio.',
+            'infractores.*.nombre.string' => 'El nombre debe ser una cadena de texto.',
+            'infractores.*.domicilio.string' => 'El domicilio debe ser una cadena de texto.',
 
             'padrones.array' => 'El campo padrones debe ser un arreglo.',
-            'padrones.*.id.required' => 'El ID del padrón es obligatorio.',
-            'padrones.*.id.integer' => 'El ID del padrón debe ser un número entero.',
-            'padrones.*.id.exists' => 'El padrón seleccionado no existe.',
-            'padrones.*.categoria_padron_id.required' => 'La categoría del padrón es obligatoria.',
+            'padrones.*.identificacion.required' => 'La identificación es obligatoria.',
+            'padrones.*.identificacion.string' => 'La identificación debe ser una cadena de texto.',
+            'padrones.*.nombre.required' => 'El nombre es obligatorio.',
+            'padrones.*.nombre.string' => 'El nombre debe ser una cadena de texto.',
             'padrones.*.categoria_padron_id.integer' => 'La categoría del padrón debe ser un número entero.',
             'padrones.*.categoria_padron_id.exists' => 'La categoría del padrón seleccionada no existe.',
             'padrones.*.observaciones.string' => 'Las observaciones deben ser una cadena de texto.',
