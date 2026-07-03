@@ -40,7 +40,7 @@ class ActaService
                 $data = array_merge($data, $this->procesarDatosCausa($data));
 
                 // Extraer adicionales para no intentar guardarlos en la tabla principal
-                $adicionales = $data['estado_acta_id'] ?? [];
+                $cautelares = $data['estado_acta_id'] ?? [];
                 unset($data['estado_acta_id']);
 
                 $acta = Acta::create($data);
@@ -48,9 +48,9 @@ class ActaService
                 $this->padronService->procesarPadrones($data['padrones'], $acta);
                 $this->infractorService->procesarInfractores($data['infractores'], $acta);
                 $this->procesarInfracciones($data['infracciones'] ?? [], $acta);
-                
-                if (!empty($adicionales)) {
-                    $acta->syncAdicionalesConLog($adicionales);
+
+                if (!empty($cautelares)) {
+                    $acta->syncCautelaresConLog($cautelares);
                 }
 
                 $this->movimientoService->registrarMovimientoInicial($acta, $data['oficina_destino_id']);
@@ -274,10 +274,10 @@ class ActaService
     {
         return DB::transaction(function () use ($actaId, $data) {
             $acta = Acta::findOrFail($actaId);
-            
+
             // Validar que el estado procesal exista
             $estadoProcesal = EstadoProcesal::findOrFail($data['estado_procesal_id']);
-            
+
             $pivotData = [
                 'fecha' => isset($data['fecha']) ? Carbon::parse($data['fecha']) : Carbon::now(),
                 'observacion' => $data['observacion'] ?? null,
