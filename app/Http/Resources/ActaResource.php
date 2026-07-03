@@ -46,7 +46,6 @@ class ActaResource extends JsonResource
             'calle_id' => $this->calle_id,
             'numero_calle' => $this->numero_calle,
             'cruce_id' => $this->cruce_id,
-            'estado_acta_id' => $this->estado_acta_id,
             'fecha_estado' => $this->fecha_estado,
             'desestimada' => $this->desestimada,
             'fecha_notificado' => $this->fecha_notificado,
@@ -90,6 +89,7 @@ class ActaResource extends JsonResource
             'infracciones' => $this->whenLoaded('infracciones', function () {
                 return InfraccionesResource::collection($this->infracciones);
             }),
+            'cautelares' => $this->whenLoaded('cautelares'),
             'juzgado' => $this->whenLoaded('juzgado'),
             'oficina' => $this->whenLoaded('oficina'),
             'ultimo_movimiento' => $this->whenLoaded('latestMovimiento'),
