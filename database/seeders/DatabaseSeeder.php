@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             SecretariaSeeder::class,
             OficinasInternasSeeder::class,
             InfraccionSeeder::class,
+            EstadosProcesalesSeeder::class,
         ]);
         // User::factory(10)->create();
 
