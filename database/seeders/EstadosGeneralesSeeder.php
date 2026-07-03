@@ -48,6 +48,14 @@ class EstadosGeneralesSeeder extends Seeder
             // P. MORDEDOR?
             // RETUVO LICENCIA?
             // INHABILITACIÓN?
+            // RET. DE LICENCIA
+            // ALCOHOLEMIA
+            // P. MORDEDOR
+            // DECRETO 540/17
+            // ACTA COMPLETA
+            // ACTA DE OFICIO
+            // FOTOMULTA
+
 
             ["label" => "estado", "nombre" => "FIRMO", "value" => "F",    "descripcion" => "FIRMO"],
             ["label" => "estado", "nombre" => "INTERVENCION", "value" => "I",    "descripcion" => "INTERVENCION"],
@@ -56,6 +64,12 @@ class EstadosGeneralesSeeder extends Seeder
             ["label" => "estado", "nombre" => "P. MORDEDOR", "value" => "P",    "descripcion" => "P. MORDEDOR"],
             ["label" => "estado", "nombre" => "RETUVO LICENCIA", "value" => "R",    "descripcion" => "RETUVO LICENCIA"],
             ["label" => "estado", "nombre" => "INHABILITACIÓN", "value" => "H",    "descripcion" => "INHABILITACIÓN"],
+            ["label" => "estado", "nombre" => "RET. DE LICENCIA", "value" => "RDL",    "descripcion" => "RET. DE LICENCIA"],
+            ["label" => "estado", "nombre" => "ALCOHOLEMIA", "value" => "ALC",    "descripcion" => "ALCOHOLEMIA"],
+            ["label" => "estado", "nombre" => "DECRETO 540/17", "value" => "DEC540",    "descripcion" => "DECRETO 540/17"],
+            ["label" => "estado", "nombre" => "ACTA COMPLETA", "value" => "AC",    "descripcion" => "ACTA COMPLETA"],
+            ["label" => "estado", "nombre" => "ACTA DE OFICIO", "value" => "AO",    "descripcion" => "ACTA DE OFICIO"],
+            ["label" => "estado", "nombre" => "FOTOMULTA", "value" => "FM",    "descripcion" => "FOTOMULTA"],
 
             /*Grado Infraccion */
             ["label" => "INFRACCION_GRADO", "nombre" => "0 - Grado 0", "value" => "0",    "descripcion" => "0 - Grado 0"],
