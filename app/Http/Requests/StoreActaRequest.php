@@ -16,14 +16,19 @@ class StoreActaRequest extends FormRequest
         return true;
     }
 
-    // protected function prepareForValidation(): void
-    // {
-    //     $this->merge([
-    //         'desestimada' => $this->has('desestimada')
-    //             ? filter_var($this->desestimada, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)
-    //             : null,
-    //     ]);
-    // }
+    protected function prepareForValidation(): void
+    {
+        // $this->merge([
+        //     'desestimada' => $this->has('desestimada')
+        //         ? filter_var($this->desestimada, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)
+        //         : null,
+        // ]);
+        // $this->merge([
+        //     'estado_acta_id' => $this->has('estado_acta_id')
+        //         ? [$this->estado_acta_id]
+        //         : null,
+        // ]);
+    }
 
     public function rules(): array
     {
@@ -55,7 +60,14 @@ class StoreActaRequest extends FormRequest
             'numero_calle' => ['nullable', 'integer', 'min:0'],
             'cruce_id' => ['nullable', 'exists:calles,id'],
 
-            'estado_acta_id' => ['nullable', 'exists:estados_generales,id'],
+            'estado_acta_id' => ['nullable', 'array'],
+            'estado_acta_id.*' => [
+                'required',
+                'integer',
+                Rule::exists('estados_generales', 'id')->where(function ($query) {
+                    return $query->where('label', 'estado');
+                })
+            ],
             'fecha_estado' => ['nullable', 'date'],
 
             // 'desestimada' => ['nullable', 'boolean'],
@@ -168,8 +180,11 @@ class StoreActaRequest extends FormRequest
             'numero_calle.min' => 'El número de calle no puede ser negativo.',
             'cruce_id.exists' => 'El cruce seleccionado no existe.',
 
-            'estado_acta_id.exists' => 'El estado del acta seleccionado no existe.',
-            'fecha_estado.date' => 'La fecha de estado debe tener una fecha válida.',
+            'estado_acta_id.array' => 'Los datos adicionales debe ser un arreglo.',
+            'estado_acta_id.*.required' => 'El ID de los datos adicionales es obligatorio.',
+            'estado_acta_id.*.integer' => 'El ID de los datos adicionales debe ser un número entero.',
+            'estado_acta_id.*.exists' => 'El dato adicional seleccionado no existe.',
+            // 'fecha_estado.date' => 'La fecha del dato adicional debe tener una fecha válida.',
 
             // 'desestimada.boolean' => 'El campo desestimada debe ser verdadero o falso.',
 
