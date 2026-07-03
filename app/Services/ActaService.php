@@ -40,8 +40,8 @@ class ActaService
                 $data = array_merge($data, $this->procesarDatosCausa($data));
 
                 // Extraer adicionales para no intentar guardarlos en la tabla principal
-                $cautelares = $data['estado_acta_id'] ?? [];
-                unset($data['estado_acta_id']);
+                $cautelares = $data['medida_cautelar_id'] ?? [];
+                unset($data['medida_cautelar_id']);
 
                 $acta = Acta::create($data);
 
