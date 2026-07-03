@@ -82,7 +82,7 @@ class DatosActaService
             'secretarias' => SecretariaResource::collection(Secretaria::all()),
             'jueces' => JuezResource::collection(Juez::all()),
             'juzgados' =>  JuzgadosResource::collection(Juzgado::all()),
-            'estado_acta' =>  EstadosGeneralesResource::collection($estadosAgrupados->get('estado', [])),
+            'medida_cautelar_acta' =>  EstadosGeneralesResource::collection($estadosAgrupados->get('estado', [])),
             'estados_procesales' => EstadoProcesalResource::collection($this->estadoProcesalService->listarEstados()),
             // 'cruces' => CalleResource::collection(Calle::all()),
         ];
