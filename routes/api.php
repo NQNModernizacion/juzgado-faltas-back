@@ -13,6 +13,7 @@ use App\Http\Controllers\InfractorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PlantillaDocumentoController;
+use App\Http\Controllers\EstadoProcesalController;
 
 
 /* Route::get('/user', function (Request $request) {
@@ -47,6 +48,8 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::post('users/{user}/sync-permissions', [AdminController::class, 'syncPermissions']);
 });
 
+// PASAR DENTRO DEL MIDDLEWARE
+
 // TODO: eliminar — diagnóstico de trusted proxies
 Route::get('proxy-check', function (Request $request) {
     return response()->json([
@@ -77,6 +80,8 @@ Route::get('grupos_actas/{id}', [GrupoActaController::class, 'show'])->name('gru
 Route::get('grupos_de_acta/{acta_id}', [GrupoActaController::class, 'grupo_por_acta'])->name('grupo_de_acta');
 Route::post('mover_causa', [MovimientoController::class, 'moverCausa']);
 Route::get('actas/{id}/movimientos', [MovimientoController::class, 'getByActa']);
+Route::post('registrar_estado_procesal', [EstadoProcesalController::class, 'registrarEstadoProcesal']);
+Route::get('actas/{id}/estados_procesales', [EstadoProcesalController::class, 'obtenerEstadosProcesales']);
 Route::get('consultar_padron', [PadronController::class, 'consultar']);
 Route::get('consultar_imputado', [InfractorController::class, 'consultarImputado']);
 
@@ -90,3 +95,6 @@ Route::post('plantillas', [PlantillaDocumentoController::class, 'store']);
 Route::get('plantillas/{id}', [PlantillaDocumentoController::class, 'show']);
 Route::put('plantillas/{id}', [PlantillaDocumentoController::class, 'update']);
 Route::delete('plantillas/{id}', [PlantillaDocumentoController::class, 'destroy']);
+
+// Rutas de Estados Procesales
+Route::apiResource('estados_procesales', EstadoProcesalController::class);
