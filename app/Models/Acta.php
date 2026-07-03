@@ -29,7 +29,7 @@ class Acta extends Model
         "calle_id",
         "numero_calle",
         "cruce_id",
-        "estado_acta_id",
+        // "estado_acta_id",
         "fecha_estado",
         "desestimada",
         "fecha_notificado",
@@ -124,6 +124,27 @@ class Acta extends Model
         }
     }
 
+    public function syncCautelaresConLog(array $cautelaresIds)
+    {
+        // 1. Hacemos el sync con los datos y atributos extra
+        $cambios = $this->cautelares()->sync($cautelaresIds);
+
+        // 2. Verificamos si realmente hubo alteraciones
+        if (!empty($cambios['attached']) || !empty($cambios['detached']) || !empty($cambios['updated'])) {
+
+            activity()
+                ->causedBy(Auth::user()->id ?? null)
+                ->performedOn($this) // Atamos el log al Acta
+                ->withProperties([
+                    // Guardamos la estructura completa
+                    'cautelares_ids' => $cautelaresIds,
+                    'detalle_cambios' => $cambios
+                ])
+                ->event('syncCautelares')
+                ->log('El usuario actualizó las medidas cautelares vinculadas al acta');
+        }
+    }
+
     public function grupo()
     {
         return $this->belongsTo(GrupoActa::class, 'grupo_acta_id');
@@ -159,6 +180,21 @@ class Acta extends Model
         return $this->belongsToMany(Infraccion::class, 'acta_infraccion')
             ->using(ActaInfraccion::class)
             ->withPivot('fecha_infraccion', 'lugar')
+            ->withTimestamps();
+    }
+
+    public function cautelares()
+    {
+        return $this->belongsToMany(EstadosGenerales::class, 'cautelar_acta', 'acta_id', 'cautelar_id')
+            ->using(CautelarActa::class)
+            ->withTimestamps();
+    }
+
+    public function estadosProcesales()
+    {
+        return $this->belongsToMany(EstadoProcesal::class, 'acta_estado_procesal')
+            ->using(ActaEstadoProcesal::class)
+            ->withPivot('id', 'fecha', 'observacion', 'infractor_id', 'imputado_datos', 'user_id')
             ->withTimestamps();
     }
 
