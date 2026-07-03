@@ -8,6 +8,7 @@ use App\Http\Resources\EstadosGeneralesResource;
 use App\Http\Resources\InfraccionesResource;
 use App\Http\Resources\InspectorResource;
 use App\Http\Resources\CalleResource;
+use App\Http\Resources\EstadoProcesalResource;
 use App\Http\Resources\JuezResource;
 use App\Http\Resources\JuzgadosResource;
 use App\Http\Resources\OficinaInternaResource;
@@ -22,7 +23,8 @@ class DatosActaService
 {
     public function __construct(
         protected OficinaService $oficinaService,
-        protected InspectorService $inspectorService
+        protected InspectorService $inspectorService,
+        protected EstadoProcesalService $estadoProcesalService
     ) {}
 
     /**
@@ -81,6 +83,7 @@ class DatosActaService
             'jueces' => JuezResource::collection(Juez::all()),
             'juzgados' =>  JuzgadosResource::collection(Juzgado::all()),
             'estado_acta' =>  EstadosGeneralesResource::collection($estadosAgrupados->get('estado', [])),
+            'estados_procesales' => EstadoProcesalResource::collection($this->estadoProcesalService->listarEstados()),
             // 'cruces' => CalleResource::collection(Calle::all()),
         ];
     }
