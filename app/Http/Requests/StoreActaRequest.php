@@ -24,8 +24,8 @@ class StoreActaRequest extends FormRequest
         //         : null,
         // ]);
         // $this->merge([
-        //     'estado_acta_id' => $this->has('estado_acta_id')
-        //         ? [$this->estado_acta_id]
+        //     'medida_cautelar_id' => $this->has('medida_cautelar_id')
+        //         ? [$this->medida_cautelar_id]
         //         : null,
         // ]);
     }
@@ -60,8 +60,8 @@ class StoreActaRequest extends FormRequest
             'numero_calle' => ['nullable', 'integer', 'min:0'],
             'cruce_id' => ['nullable', 'exists:calles,id'],
 
-            'estado_acta_id' => ['nullable', 'array'],
-            'estado_acta_id.*' => [
+            'medida_cautelar_id' => ['nullable', 'array'],
+            'medida_cautelar_id.*' => [
                 'required',
                 'integer',
                 Rule::exists('estados_generales', 'id')->where(function ($query) {
@@ -180,10 +180,10 @@ class StoreActaRequest extends FormRequest
             'numero_calle.min' => 'El número de calle no puede ser negativo.',
             'cruce_id.exists' => 'El cruce seleccionado no existe.',
 
-            'estado_acta_id.array' => 'Los datos adicionales debe ser un arreglo.',
-            'estado_acta_id.*.required' => 'El ID de los datos adicionales es obligatorio.',
-            'estado_acta_id.*.integer' => 'El ID de los datos adicionales debe ser un número entero.',
-            'estado_acta_id.*.exists' => 'El dato adicional seleccionado no existe.',
+            'medida_cautelar_id.array' => 'Las medidas cautelares debe ser un arreglo.',
+            'medida_cautelar_id.*.required' => 'El ID de las medidas cautelares es obligatorio.',
+            'medida_cautelar_id.*.integer' => 'El ID de las medidas cautelares debe ser un número entero.',
+            'medida_cautelar_id.*.exists' => 'La medida cautelar seleccionada no existe.',
             // 'fecha_estado.date' => 'La fecha del dato adicional debe tener una fecha válida.',
 
             // 'desestimada.boolean' => 'El campo desestimada debe ser verdadero o falso.',
