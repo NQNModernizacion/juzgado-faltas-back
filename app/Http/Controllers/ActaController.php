@@ -25,7 +25,7 @@ class ActaController extends Controller
         try {
             $acta = $this->actaService->registrarActa($request->validated());
 
-            return sendResponse(new ActaResource($acta->load('grupo', 'padrones', 'infractores', 'infracciones')));
+            return sendResponse(new ActaResource($acta->load('grupo', 'padrones', 'infractores', 'infracciones', 'cautelares')));
         } catch (\DomainException $e) {
             return sendResponse(null, ['general' => $e->getMessage()], 422);
         } catch (\Throwable $e) {
@@ -52,7 +52,7 @@ class ActaController extends Controller
         try {
             $acta = $this->actaService->actualizarActa($id, $request->validated());
 
-            return sendResponse(new ActaResource($acta->load('grupo', 'padrones', 'infractores', 'infracciones')));
+            return sendResponse(new ActaResource($acta->load('grupo', 'padrones', 'infractores', 'infracciones', 'cautelares')));
         } catch (\DomainException $e) {
             return sendResponse(null, ['general' => $e->getMessage()], 422);
         } catch (\Throwable $e) {
