@@ -71,4 +71,14 @@ class EstadosGenerales extends Model
     {
         return $this->hasMany(Inspector::class, 'habilitado_id', 'id');
     }
+
+    /**
+     * Obtiene las actas vinculadas como estado adicional.
+     */
+    public function actas()
+    {
+        return $this->belongsToMany(Acta::class, 'adicional_acta', 'adicional_id', 'acta_id')
+            ->using(AdicionalActa::class)
+            ->withTimestamps();
+    }
 }
