@@ -9,6 +9,8 @@ use App\Models\OficinaInterna;
 use App\Models\Secretaria;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use App\Models\EstadoProcesal;
 
 class ActaService
 {
@@ -37,11 +39,19 @@ class ActaService
 
                 $data = array_merge($data, $this->procesarDatosCausa($data));
 
+                // Extraer adicionales para no intentar guardarlos en la tabla principal
+                $adicionales = $data['estado_acta_id'] ?? [];
+                unset($data['estado_acta_id']);
+
                 $acta = Acta::create($data);
 
                 $this->padronService->procesarPadrones($data['padrones'], $acta);
                 $this->infractorService->procesarInfractores($data['infractores'], $acta);
                 $this->procesarInfracciones($data['infracciones'] ?? [], $acta);
+                
+                if (!empty($adicionales)) {
+                    $acta->syncAdicionalesConLog($adicionales);
+                }
 
                 $this->movimientoService->registrarMovimientoInicial($acta, $data['oficina_destino_id']);
 
@@ -79,6 +89,13 @@ class ActaService
                     $data['secretaria_subrogante_id'] = null;
                 }
 
+                // Extraer adicionales para no intentar guardarlos en la tabla principal
+                $adicionales = null;
+                if (array_key_exists('estado_acta_id', $data)) {
+                    $adicionales = $data['estado_acta_id'] ?? [];
+                    unset($data['estado_acta_id']);
+                }
+
                 $acta->update($data);
 
                 // Reutilizamos los métodos que hacen "sync()", los cuales automáticamente
@@ -92,6 +109,9 @@ class ActaService
                 }
                 if (isset($data['infracciones'])) {
                     $this->procesarInfracciones($data['infracciones'], $acta);
+                }
+                if ($adicionales !== null) {
+                    $acta->syncAdicionalesConLog($adicionales);
                 }
 
                 return $acta;
@@ -232,7 +252,7 @@ class ActaService
      */
     public function obtenerDetalleActa(int $id): Acta
     {
-        $acta = Acta::with(['grupo', 'padrones', 'infractores', 'infracciones', 'juzgado', 'oficina', 'latestMovimiento.oficinaDestino', 'juez', 'secretaria'])
+        $acta = Acta::with(['grupo', 'padrones', 'infractores', 'infracciones', 'adicionales', 'juzgado', 'oficina', 'latestMovimiento.oficinaDestino', 'juez', 'secretaria', 'estadosProcesales'])
             ->find($id);
 
         if (!$acta) {
@@ -240,5 +260,56 @@ class ActaService
         }
 
         return $acta;
+    }
+
+    /**
+     * Registra un cambio de estado procesal en el historial del acta.
+     *
+     * @param int $actaId
+     * @param array $data
+     * @return Acta
+     * @throws \DomainException
+     */
+    public function registrarEstadoProcesal(int $actaId, array $data): Acta
+    {
+        return DB::transaction(function () use ($actaId, $data) {
+            $acta = Acta::findOrFail($actaId);
+            
+            // Validar que el estado procesal exista
+            $estadoProcesal = EstadoProcesal::findOrFail($data['estado_procesal_id']);
+            
+            $pivotData = [
+                'fecha' => isset($data['fecha']) ? Carbon::parse($data['fecha']) : Carbon::now(),
+                'observacion' => $data['observacion'] ?? null,
+                'infractor_id' => $data['infractor_id'] ?? null,
+                'imputado_datos' => $data['imputado_datos'] ?? null,
+                'user_id' => Auth::id() ?? null,
+            ];
+
+            // Registrar el nuevo estado en el historial (pivot table)
+            $acta->estadosProcesales()->attach($estadoProcesal->id, $pivotData);
+
+            return $acta;
+        });
+    }
+
+    /**
+     * Obtiene el historial de estados procesales de un acta ordenados por fecha descendente.
+     *
+     * @param int $actaId
+     * @return \Illuminate\Support\Collection
+     * @throws \DomainException
+     */
+    public function obtenerHistorialEstadosProcesales(int $actaId)
+    {
+        $acta = Acta::find($actaId);
+        if (!$acta) {
+            throw new \DomainException("El acta con ID {$actaId} no existe.");
+        }
+
+        return $acta->estadosProcesales()
+            ->orderBy('fecha', 'desc')
+            ->orderBy('acta_estado_procesal.id', 'desc')
+            ->get();
     }
 }
