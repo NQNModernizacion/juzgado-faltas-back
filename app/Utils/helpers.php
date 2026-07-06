@@ -40,6 +40,46 @@ if (!function_exists('error_response')) {
     }
 }
 
+if (!function_exists('sendPdfResponse')) {
+    /**
+     * Retorna una respuesta HTTP binaria adecuada para que el frontend la consuma como un Blob.
+     *
+     * @param \Spatie\LaravelPdf\PdfBuilder|string $pdfContent Instancia de PdfBuilder o contenido binario crudo del PDF.
+     * @param string $filename Nombre de archivo sugerido para la cabecera.
+     * @return \Illuminate\Http\Response
+     */
+    function sendPdfResponse($pdfContent, string $filename = 'documento.pdf')
+    {
+        $data = ($pdfContent instanceof \Spatie\LaravelPdf\PdfBuilder)
+            ? $pdfContent->output()
+            : $pdfContent;
+
+        return response($data, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            'Access-Control-Expose-Headers' => 'Content-Disposition',
+        ]);
+    }
+}
+
+if (!function_exists('pdf_to_base64')) {
+    /**
+     * Convierte una instancia de PDF o contenido binario en una cadena Base64 lista para ser enviada en JSON.
+     *
+     * @param \Spatie\LaravelPdf\PdfBuilder|string $pdfContent Instancia de PdfBuilder o contenido binario crudo del PDF.
+     * @return string Cadena codificada en Base64.
+     */
+    function pdf_to_base64($pdfContent): string
+    {
+        // Spatie Laravel PDF usa base64() tanto para el builder real como el fake
+        if ($pdfContent instanceof \Spatie\LaravelPdf\PdfBuilder || $pdfContent instanceof \Spatie\LaravelPdf\FakePdfBuilder) {
+            return $pdfContent->base64();
+        }
+
+        return base64_encode($pdfContent);
+    }
+}
+
 
 if (!function_exists('is_email')) {
     function is_email(string $email): bool
