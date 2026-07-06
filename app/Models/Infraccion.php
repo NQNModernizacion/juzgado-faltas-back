@@ -19,6 +19,9 @@ class Infraccion extends Model
     protected $fillable = [
         'tipo_infraccion_id',
         'identificacion',
+        'codigo_sistema',
+        'articulo',
+        'inciso',
         'descripcion',
         'ley',
         'grado',
