@@ -19,6 +19,7 @@ class ActaResource extends JsonResource
             return [
                 'id' => $this->id,
                 'numero_acta' => $this->numero_acta,
+                'numero_causa' => $this->numero_causa,
                 'year' => $this->year,
                 'juzgado' => $this->juzgado?->descripcion ?? "Sin Juzgado",
                 'oficina' => $this->oficina?->descripcion ?? "Sin Oficina",
@@ -35,6 +36,7 @@ class ActaResource extends JsonResource
                 return new GrupoActaResource($this->grupo);
             }),
             'numero_acta' => $this->numero_acta,
+            'numero_causa' => $this->numero_causa,
             'year' => $this->year,
             'oficina_id' => $this->oficina_id,
             'fecha_labrada' => $this->fecha_labrada,
