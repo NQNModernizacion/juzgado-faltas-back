@@ -15,6 +15,7 @@ class Oficina extends Model
     protected $fillable = [
         "codigo",
         "descripcion",
+        "descripcion_resumida",
         "codigo_caja",
     ];
 
