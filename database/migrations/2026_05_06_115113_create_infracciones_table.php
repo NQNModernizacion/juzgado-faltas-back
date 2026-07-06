@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('tipo_infraccion_id')->nullable();
             $table->string('identificacion')->nullable();
+            $table->string('codigo_sistema')->nullable();
+            $table->string('articulo')->nullable();
+            $table->string('inciso')->nullable();
             $table->text('descripcion')->nullable();
             $table->string('ley')->nullable();
             $table->string('grado')->nullable();
