@@ -37,6 +37,19 @@ class ActaService
                     $data['grupo_acta_id'] = $this->grupoService->resolverGrupoActaId($data['grupo_acta_id']);
                 }
 
+                // Determinar el año basándonos en la fecha de labrado
+                $fechaLabrada = isset($data['fecha_labrada']) ? Carbon::parse($data['fecha_labrada']) : Carbon::now();
+                $year = (string) $fechaLabrada->year;
+                $data['year'] = $year;
+
+                // Obtener el último número de causa para el año con bloqueo para evitar condiciones de carrera
+                $ultimoRegistro = Acta::where('year', $year)
+                    ->orderBy('numero_causa', 'desc')
+                    ->lockForUpdate()
+                    ->first();
+
+                $data['numero_causa'] = $ultimoRegistro ? ($ultimoRegistro->numero_causa + 1) : 1;
+
                 $data = array_merge($data, $this->procesarDatosCausa($data));
 
                 // Extraer adicionales para no intentar guardarlos en la tabla principal
@@ -181,8 +194,8 @@ class ActaService
             'oficina_destino_id' => $oficinaInterna,
             'secretaria_id' => $secretaria->id,
             'juez_id' => $juez->id,
-            'estado_causa_id' => 1,
-            'fecha_estado_causa' => Carbon::now()->format('Y-m-d'),
+            // 'estado_causa_id' => 1,
+            // 'fecha_estado_causa' => Carbon::now()->format('Y-m-d'),
             // 'fecha_notificado_causa' => $data['fecha_notificado'],
         ];
     }
