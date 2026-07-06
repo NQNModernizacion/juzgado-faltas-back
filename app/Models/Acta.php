@@ -40,6 +40,7 @@ class Acta extends Model
         "juez_id",
         "juez_subrogante_id",
         "secretaria_subrogante_id",
+        "numero_causa",
         "causa_id_padre",
         "fecha_vinculacion_padre",
         "caratula",
@@ -232,5 +233,15 @@ class Acta extends Model
     public function oficina()
     {
         return $this->belongsTo(Oficina::class, 'oficina_id');
+    }
+
+    public function inspector1()
+    {
+        return $this->belongsTo(Inspector::class, 'inspector_1_id');
+    }
+
+    public function inspector2()
+    {
+        return $this->belongsTo(Inspector::class, 'inspector_2_id');
     }
 }
