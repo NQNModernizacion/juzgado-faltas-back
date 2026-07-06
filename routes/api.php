@@ -95,6 +95,7 @@ Route::post('plantillas', [PlantillaDocumentoController::class, 'store']);
 Route::get('plantillas/{id}', [PlantillaDocumentoController::class, 'show']);
 Route::put('plantillas/{id}', [PlantillaDocumentoController::class, 'update']);
 Route::delete('plantillas/{id}', [PlantillaDocumentoController::class, 'destroy']);
+Route::get('generar_caratula/{acta}', [DocumentoLegalController::class, 'generarCaratula']);
 
 // Rutas de Estados Procesales
 Route::apiResource('estados_procesales', EstadoProcesalController::class);
