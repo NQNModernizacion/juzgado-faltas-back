@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c79e4c270398d9110f6f7c8fc9ef735b",
+    "content-hash": "23f2b11a211275d489ac826a9a2d6e28",
     "packages": [
         {
             "name": "brick/math",
@@ -3359,16 +3359,16 @@
         },
         {
             "name": "spatie/browsershot",
-            "version": "5.2.3",
+            "version": "5.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/browsershot.git",
-                "reference": "d2e4ac7c69162999940172a674bf83ddc5ac59ea"
+                "reference": "dcf7a65fd1d0fc8fd113739b84982377728d0b2f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/browsershot/zipball/d2e4ac7c69162999940172a674bf83ddc5ac59ea",
-                "reference": "d2e4ac7c69162999940172a674bf83ddc5ac59ea",
+                "url": "https://api.github.com/repos/spatie/browsershot/zipball/dcf7a65fd1d0fc8fd113739b84982377728d0b2f",
+                "reference": "dcf7a65fd1d0fc8fd113739b84982377728d0b2f",
                 "shasum": ""
             },
             "require": {
@@ -3415,7 +3415,7 @@
                 "webpage"
             ],
             "support": {
-                "source": "https://github.com/spatie/browsershot/tree/5.2.3"
+                "source": "https://github.com/spatie/browsershot/tree/5.4.0"
             },
             "funding": [
                 {
@@ -3423,7 +3423,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-02-18T16:10:58+00:00"
+            "time": "2026-05-26T13:13:33+00:00"
         },
         {
             "name": "spatie/laravel-activitylog",
@@ -3579,34 +3579,35 @@
         },
         {
             "name": "spatie/laravel-pdf",
-            "version": "2.2.0",
+            "version": "2.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-pdf.git",
-                "reference": "b7eb593d5ffd9128d87635f6a4a9f7fb2087e65d"
+                "reference": "9656389f566fc4e7435d1902b35c9c220e932b2c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-pdf/zipball/b7eb593d5ffd9128d87635f6a4a9f7fb2087e65d",
-                "reference": "b7eb593d5ffd9128d87635f6a4a9f7fb2087e65d",
+                "url": "https://api.github.com/repos/spatie/laravel-pdf/zipball/9656389f566fc4e7435d1902b35c9c220e932b2c",
+                "reference": "9656389f566fc4e7435d1902b35c9c220e932b2c",
                 "shasum": ""
             },
             "require": {
-                "illuminate/contracts": "^11.0|^12.0",
+                "illuminate/contracts": "^11.0|^12.0|^13.0",
                 "php": "^8.2",
                 "spatie/laravel-package-tools": "^1.16.1",
                 "spatie/temporary-directory": "^2.2.1"
             },
             "require-dev": {
+                "chrome-php/chrome": "^1.0",
                 "dompdf/dompdf": "^3.0",
                 "ext-imagick": "*",
                 "larastan/larastan": "^2.7.0|^3.0",
                 "laravel/pint": "^1.13.7",
                 "nunomaduro/collision": "^8.0",
-                "orchestra/testbench": "^9.6|^10.0",
-                "pestphp/pest": "^2.30|^3.7",
-                "pestphp/pest-plugin-arch": "^2.5|^3.0",
-                "pestphp/pest-plugin-laravel": "^2.2|^3.1",
+                "orchestra/testbench": "^9.6|^10.0|^11.0",
+                "pestphp/pest": "^2.30|^3.7|^4.4",
+                "pestphp/pest-plugin-arch": "^2.5|^3.0|^4.0",
+                "pestphp/pest-plugin-laravel": "^2.2|^3.1|^4.1",
                 "phpstan/extension-installer": "^1.3.1",
                 "phpstan/phpstan-deprecation-rules": "^1.1.4|^2.0",
                 "phpstan/phpstan-phpunit": "^1.3.15|^2.0",
@@ -3619,11 +3620,14 @@
                 "spatie/pest-expectations": "^1.5",
                 "spatie/pest-plugin-snapshots": "^2.1",
                 "spatie/pixelmatch-php": "^1.0",
+                "tecnickcom/tc-lib-pdf-encrypt": "^2.5",
                 "wnx/sidecar-browsershot": "^2.0"
             },
             "suggest": {
+                "chrome-php/chrome": "Required for the Chrome PHP driver (^1.0)",
                 "dompdf/dompdf": "Required for the DOMPDF driver (^3.0)",
-                "spatie/browsershot": "Required for the Browsershot driver (^4.0|^5.0)"
+                "spatie/browsershot": "Required for the Browsershot driver (^4.0|^5.0)",
+                "tecnickcom/tc-lib-pdf-encrypt": "Required to password-protect PDFs with the default encrypter (^2.5)"
             },
             "type": "library",
             "extra": {
@@ -3664,9 +3668,9 @@
             ],
             "support": {
                 "issues": "https://github.com/spatie/laravel-pdf/issues",
-                "source": "https://github.com/spatie/laravel-pdf/tree/2.2.0"
+                "source": "https://github.com/spatie/laravel-pdf/tree/2.12.0"
             },
-            "time": "2026-02-12T22:32:05+00:00"
+            "time": "2026-06-11T08:47:03+00:00"
         },
         {
             "name": "spatie/laravel-permission",
@@ -8911,5 +8915,5 @@
         "php": "^8.2"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }
