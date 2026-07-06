@@ -47,8 +47,15 @@ class DocumentoLegalController extends Controller
             $documento = DocumentoLegal::findOrFail($id);
             $pdf = $this->service->generarPdfSpatie($documento);
 
-            // Retorna un stream directo en lugar de download para visualización en navegador (o download si prefieres)
-            return $pdf->inline("documento_{$documento->id}.pdf");
+            $base64 = $pdf->base64();
+            $size = (int) (strlen($base64) * 3 / 4) - (substr($base64, -2) === '==' ? 2 : (substr($base64, -1) === '=' ? 1 : 0));
+
+            return sendResponse([
+                'type' => 'pdf',
+                'file_name' => "documento_{$documento->id}.pdf",
+                'size' => $size,
+                'file' => 'data:application/pdf;base64,' . $base64
+            ]);
         } catch (DomainException $e) {
             return sendResponse(null, ['general' => $e->getMessage()], 422);
         } catch (Throwable $th) {
@@ -95,7 +102,16 @@ class DocumentoLegalController extends Controller
     {
         try {
             $pdf = $this->service->crearCaratula($acta);
-            return $pdf->inline("caratula_acta_{$acta->numero_acta}.pdf");
+
+            $base64 = $pdf->base64();
+            $size = (int) (strlen($base64) * 3 / 4) - (substr($base64, -2) === '==' ? 2 : (substr($base64, -1) === '=' ? 1 : 0));
+
+            return sendResponse([
+                'type' => 'pdf',
+                'file_name' => "caratula_acta_{$acta->numero_acta}.pdf",
+                'size' => $size,
+                'file' => 'data:application/pdf;base64,' . $base64
+            ]);
         } catch (Throwable $th) {
             return error_response($th);
         }
