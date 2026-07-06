@@ -124,7 +124,7 @@ class ActaService
                     $this->procesarInfracciones($data['infracciones'], $acta);
                 }
                 if ($adicionales !== null) {
-                    $acta->syncAdicionalesConLog($adicionales);
+                    $acta->syncCautelaresConLog($adicionales);
                 }
 
                 return $acta;
@@ -265,7 +265,7 @@ class ActaService
      */
     public function obtenerDetalleActa(int $id): Acta
     {
-        $acta = Acta::with(['grupo', 'padrones', 'infractores', 'infracciones', 'adicionales', 'juzgado', 'oficina', 'latestMovimiento.oficinaDestino', 'juez', 'secretaria', 'estadosProcesales'])
+        $acta = Acta::with(['grupo', 'padrones', 'infractores', 'infracciones', 'cautelares', 'juzgado', 'oficina', 'latestMovimiento.oficinaDestino', 'juez', 'secretaria', 'estadosProcesales'])
             ->find($id);
 
         if (!$acta) {
