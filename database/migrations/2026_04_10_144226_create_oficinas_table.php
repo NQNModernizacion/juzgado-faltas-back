@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('oficinas', function (Blueprint $table) {
             $table->id();
             $table->string('codigo', 100)->nullable()->index('codigo_oficina');
-            $table->string('descripcion',)->nullable();
-            $table->string('codigo_caja',)->nullable()->index('codigo_caja_oficina');
+            $table->string('descripcion')->nullable();
+            $table->string('descripcion_resumida')->nullable();
+            $table->string('codigo_caja')->nullable()->index('codigo_caja_oficina');
             $table->timestamps();
             $table->softDeletes();
         });
