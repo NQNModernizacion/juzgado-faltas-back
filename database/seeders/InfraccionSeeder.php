@@ -27,9 +27,17 @@ class InfraccionSeeder extends Seeder
         foreach ($infracciones as $data) {
             $tipo_id = $tipos[$data['tipo']] ?? null;
 
+            $parts = explode('-', $data['identificacion']);
+            $codigo_sistema = $parts[0] ?? null;
+            $articulo = $parts[1] ?? null;
+            $inciso = $parts[2] ?? null;
+
             \App\Models\Infraccion::create([
                 'tipo_infraccion_id'     => $tipo_id,
                 'identificacion'         => $data['identificacion'],
+                'codigo_sistema'         => $codigo_sistema,
+                'articulo'               => $articulo,
+                'inciso'                 => $inciso,
                 'descripcion'            => $data['descripcion'],
                 'ley'                    => $data['ley'],
                 'grado'                  => $data['grado'],
