@@ -114,6 +114,7 @@ class StoreActaRequest extends FormRequest
             'caratula' => ['required', 'string'],
             'color' => ['required', 'string'],
             'observacion' => ['required', 'string'],
+            'oficina_destino_id' => ['required', 'exists:oficina_internas,id']
         ];
     }
 
@@ -240,6 +241,8 @@ class StoreActaRequest extends FormRequest
             'color.string' => 'El color debe ser una cadena de texto.',
             'observacion.required' => 'La observacion es obligatoria.',
             'observacion.string' => 'La observacion debe ser una cadena de texto.',
+            'oficina_destino_id.required' => 'La oficina destino es obligatoria.',
+            'oficina_destino_id.exists' => 'La oficina destino seleccionada no existe.',
         ];
     }
 }
