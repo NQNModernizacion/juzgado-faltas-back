@@ -62,6 +62,8 @@ class ActaService
                 $this->infractorService->procesarInfractores($data['infractores'], $acta);
                 $this->procesarInfracciones($data['infracciones'] ?? [], $acta);
 
+                $this->registrarEstadoProcesal($acta->id, ['estado_procesal_id' => 1, 'fecha' => $fechaLabrada, 'observacion' => 'Insertado automaticamente al crear causa desde acta.']);
+
                 if (!empty($cautelares)) {
                     $acta->syncCautelaresConLog($cautelares);
                 }
