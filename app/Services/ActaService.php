@@ -173,11 +173,12 @@ class ActaService
             throw new \DomainException("No se pudo determinar el juzgado de turno para la fecha indicada.");
         }
 
-        $oficinaInternaRecord = OficinaInterna::where('codigo', '0')->first();
-        if (!$oficinaInternaRecord) {
-            throw new \DomainException("Error de configuración: No se encontró la oficina interna raíz (código 0).");
-        }
-        $oficinaInterna = $oficinaInternaRecord->id;
+        // $oficinaInternaRecord = OficinaInterna::where('codigo', '0')->first();
+        // $oficinaInternaRecord = OficinaInterna::where('id', $data['oficina_interna_id'])->first();
+        // if (!$oficinaInternaRecord) {
+        //     throw new \DomainException("Error de configuración: No se encontró la oficina interna.");
+        // }
+        // $oficinaInterna = $oficinaInternaRecord->id;
 
         $juez = $this->resolverJuezId($juzgado->juez_id);
         if (!$juez) {
@@ -191,7 +192,7 @@ class ActaService
 
         return [
             'numero_juzgado_id' => $juzgado->id,
-            'oficina_destino_id' => $oficinaInterna,
+            // 'oficina_destino_id' => $oficinaInterna,
             'secretaria_id' => $secretaria->id,
             'juez_id' => $juez->id,
             // 'estado_causa_id' => 1,
