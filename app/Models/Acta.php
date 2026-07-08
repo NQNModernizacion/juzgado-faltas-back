@@ -198,16 +198,21 @@ class Acta extends Model
             ->withPivot('id', 'fecha', 'observacion', 'infractor_id', 'imputado_datos', 'user_id')
             ->withTimestamps();
     }
+    public function ultimoEstadoProcesal()
+    {
+        return $this->hasOne(ActaEstadoProcesal::class, 'acta_id')->latestOfMany();
+    }
 
     public function movimientos()
     {
         return $this->hasMany(Movimiento::class, 'acta_id');
     }
 
-    public function latestMovimiento()
+    public function ultimoMovimiento()
     {
         return $this->hasOne(Movimiento::class, 'acta_id')->latestOfMany();
     }
+
 
     public function juzgado()
     {
