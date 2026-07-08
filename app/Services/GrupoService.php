@@ -234,7 +234,7 @@ class GrupoService
             'actas.infracciones',
             'actas.juzgado',
             'actas.oficina',
-            'actas.latestMovimiento.oficinaDestino'
+            'actas.ultimoMovimiento.oficinaDestino'
         ])->find($id);
 
         if (!$grupo) {
@@ -266,7 +266,7 @@ class GrupoService
                     'infracciones',
                     'juzgado',
                     'oficina',
-                    'latestMovimiento.oficinaDestino'
+                    'ultimoMovimiento.oficinaDestino'
                 ]);
             }
         ])->find($acta->grupo_acta_id);
