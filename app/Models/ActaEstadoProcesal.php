@@ -19,6 +19,11 @@ class ActaEstadoProcesal extends Pivot
         'imputado_datos',
         'user_id',
     ];
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at'
+    ];
 
     /**
      * User who made the transition.
