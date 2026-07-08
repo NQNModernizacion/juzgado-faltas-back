@@ -36,6 +36,8 @@ class UpdateActaRequest extends StoreActaRequest
                     ->whereNull('deleted_at');
             }),
         ];
+        $rules['oficina_destino_id'] = ['nullable', 'exists:oficina_internas,id'];
+
 
         return $rules;
     }
