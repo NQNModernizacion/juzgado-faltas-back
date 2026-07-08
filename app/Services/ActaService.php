@@ -245,7 +245,7 @@ class ActaService
      */
     public function obtenerListadoActas(array $filters = [], int $perPage = 15)
     {
-        $query = Acta::with(['juzgado', 'oficina', 'latestMovimiento.oficinaDestino']);
+        $query = Acta::with(['juzgado', 'oficina', 'ultimoMovimiento.oficinaDestino']);
 
         // Ejemplo de filtro (preparado para futuro)
         if (!empty($filters['numero_acta'])) {
@@ -268,7 +268,7 @@ class ActaService
      */
     public function obtenerDetalleActa(int $id): Acta
     {
-        $acta = Acta::with(['grupo', 'padrones', 'infractores', 'infracciones', 'cautelares', 'juzgado', 'oficina', 'latestMovimiento.oficinaDestino', 'juez', 'secretaria', 'estadosProcesales'])
+        $acta = Acta::with(['grupo', 'padrones', 'infractores', 'infracciones', 'cautelares', 'juzgado', 'oficina', 'ultimoMovimiento.oficinaDestino', 'juez', 'secretaria', 'estadosProcesales', 'ultimoEstadoProcesal'])
             ->find($id);
 
         if (!$acta) {
