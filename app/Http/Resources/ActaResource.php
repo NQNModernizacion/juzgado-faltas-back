@@ -23,7 +23,7 @@ class ActaResource extends JsonResource
                 'year' => $this->year,
                 'juzgado' => $this->juzgado?->descripcion ?? "Sin Juzgado",
                 'oficina' => $this->oficina?->descripcion ?? "Sin Oficina",
-                'ultimo_movimiento' => $this->latestMovimiento?->oficinaDestino?->descripcion ?? "Sin Movimiento",
+                'ultimo_movimiento' => $this->ultimoMovimiento?->oficinaDestino?->descripcion ?? "Sin Movimiento",
                 'grupo_acta_id' => $this->grupo_acta_id
             ];
         }
@@ -94,7 +94,8 @@ class ActaResource extends JsonResource
             'cautelares' => $this->whenLoaded('cautelares'),
             'juzgado' => $this->whenLoaded('juzgado'),
             'oficina' => $this->whenLoaded('oficina'),
-            'ultimo_movimiento' => $this->whenLoaded('latestMovimiento'),
+            'ultimo_movimiento' => $this->whenLoaded('ultimoMovimiento'),
+            'ultimo_estado_procesal' => $this->whenLoaded('ultimoEstadoProcesal'),
         ];
     }
 }
