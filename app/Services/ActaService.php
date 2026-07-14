@@ -106,9 +106,9 @@ class ActaService
 
                 // Extraer adicionales para no intentar guardarlos en la tabla principal
                 $adicionales = null;
-                if (array_key_exists('estado_acta_id', $data)) {
-                    $adicionales = $data['estado_acta_id'] ?? [];
-                    unset($data['estado_acta_id']);
+                if (array_key_exists('medida_cautelar_id', $data)) {
+                    $adicionales = $data['medida_cautelar_id'] ?? [];
+                    unset($data['medida_cautelar_id']);
                 }
 
                 $acta->update($data);
@@ -125,6 +125,9 @@ class ActaService
                 if (isset($data['infracciones'])) {
                     $this->procesarInfracciones($data['infracciones'], $acta);
                 }
+
+                // $this->registrarEstadoProcesal($acta->id, ['estado_procesal_id' => 1, 'fecha' => $fechaLabrada, 'observacion' => 'Insertado automaticamente al crear causa desde acta.']);
+
                 if ($adicionales !== null) {
                     $acta->syncCautelaresConLog($adicionales);
                 }
