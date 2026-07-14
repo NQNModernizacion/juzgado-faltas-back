@@ -95,7 +95,9 @@ class ActaResource extends JsonResource
             'juzgado' => $this->whenLoaded('juzgado'),
             'oficina' => $this->whenLoaded('oficina'),
             'ultimo_movimiento' => $this->whenLoaded('ultimoMovimiento'),
-            'ultimo_estado_procesal' => $this->whenLoaded('ultimoEstadoProcesal'),
+            'estado_acta_id' => $this->whenLoaded('ultimoEstadoProcesal', function () {
+                return $this->ultimoEstadoProcesal?->id;
+            }),
         ];
     }
 }
