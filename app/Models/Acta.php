@@ -249,4 +249,9 @@ class Acta extends Model
     {
         return $this->belongsTo(Inspector::class, 'inspector_2_id');
     }
+
+    public function pruebas()
+    {
+        return $this->hasMany(Prueba::class, 'acta_id');
+    }
 }
