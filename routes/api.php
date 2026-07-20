@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PlantillaDocumentoController;
 use App\Http\Controllers\EstadoProcesalController;
+use App\Http\Controllers\PruebaController;
 
 
 /* Route::get('/user', function (Request $request) {
@@ -99,3 +100,10 @@ Route::get('generar_caratula/{acta}', [DocumentoLegalController::class, 'generar
 
 // Rutas de Estados Procesales
 Route::apiResource('estados_procesales', EstadoProcesalController::class);
+
+// Rutas de Pruebas
+Route::get('actas/{id}/pruebas', [PruebaController::class, 'listarPorActa']);
+Route::post('pruebas', [PruebaController::class, 'store']);
+Route::get('pruebas/{prueba}', [PruebaController::class, 'show']);
+Route::post('pruebas/{prueba}', [PruebaController::class, 'update']);
+Route::delete('pruebas/{prueba}', [PruebaController::class, 'destroy']);
