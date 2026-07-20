@@ -115,6 +115,7 @@ class StoreActaRequest extends FormRequest
             'color' => ['required', 'string'],
             'observacion' => ['required', 'string'],
             'oficina_destino_id' => ['required', 'exists:oficina_internas,id']
+            // 'estado_procesal_id' => ['required', 'exists:estados_procesales,id']
         ];
     }
 
