@@ -22,6 +22,10 @@ class Prueba extends Model
         'user_id',
     ];
 
+    protected $casts = [
+        'tipo_archivo' => 'boolean',
+    ];
+
     /**
      * Obtiene el acta al que pertenece la prueba.
      */
