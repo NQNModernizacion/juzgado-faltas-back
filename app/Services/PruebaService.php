@@ -67,7 +67,7 @@ class PruebaService
 
             $removerArchivo = isset($data['remover_archivo']) && filter_var($data['remover_archivo'], FILTER_VALIDATE_BOOLEAN);
             $tieneNuevoArchivo = isset($data['archivo']) && $data['archivo']->isValid();
-            $cambiaATexto = isset($data['tipo_archivo']) && $data['tipo_archivo'] === 'texto';
+            $cambiaATexto = isset($data['tipo_archivo']) && !$data['tipo_archivo'];
 
             // 1. Remover archivo viejo si se solicita remover, si se sube uno nuevo o si el tipo cambia a texto
             if ($removerArchivo || $tieneNuevoArchivo || $cambiaATexto) {
