@@ -24,36 +24,37 @@ class StorePruebaRequest extends FormRequest
      */
     public function rules(): array
     {
-        $tipo = $this->input('tipo_archivo');
+        $tipo = $this->boolean('tipo_archivo');
 
         $rules = [
             'acta_id' => ['required', 'exists:actas,id'],
-            'tipo_archivo' => ['required', 'in:imagen,pdf,video,audio,txt,texto'],
+            // 'tipo_archivo' => ['required', 'in:imagen,pdf,video,audio,txt,texto'],
+            'tipo_archivo' => ['required', 'boolean'],
             'observacion' => ['required', 'string'],
         ];
 
-        if ($tipo === 'texto') {
+        if (!$tipo) {
             $rules['archivo'] = ['nullable', 'prohibited'];
-        } elseif ($tipo) {
-            $fileRules = ['required', 'file', 'max:20480'];
+        } else {
+            $fileRules = ['required', 'file', 'max:20480', 'mimes:jpg,png,gif,webp,svg,pdf,mp4,mpeg,mov,avi,quicktime,mp3,wav,ogg,m4a,aac,txt,text'];
 
-            switch ($tipo) {
-                case 'imagen':
-                    $fileRules[] = 'mimes:jpeg,jpg,png,gif,webp,svg';
-                    break;
-                case 'pdf':
-                    $fileRules[] = 'mimes:pdf';
-                    break;
-                case 'video':
-                    $fileRules[] = 'mimes:mp4,mpeg,mov,avi,quicktime';
-                    break;
-                case 'audio':
-                    $fileRules[] = 'mimes:mp3,wav,ogg,m4a,aac';
-                    break;
-                case 'txt':
-                    $fileRules[] = 'mimes:txt,text';
-                    break;
-            }
+            // switch ($tipo) {
+            // case 'imagen':
+            // $fileRules[] = 'mimes:jpeg,jpg,png,gif,webp,svg';
+            // break;  
+            // case 'pdf':
+            // $fileRules[] = 'mimes:pdf';
+            // break;
+            // case 'video':
+            // $fileRules[] = 'mimes:mp4,mpeg,mov,avi,quicktime';
+            // break;
+            // case 'audio':
+            // $fileRules[] = 'mimes:mp3,wav,ogg,m4a,aac';
+            // break;
+            // case 'txt':
+            // $fileRules[] = 'mimes:txt,text';
+            // break;
+            // }
 
             $rules['archivo'] = $fileRules;
         }
@@ -72,7 +73,7 @@ class StorePruebaRequest extends FormRequest
             'acta_id.required' => 'El acta es obligatoria.',
             'acta_id.exists' => 'El acta seleccionada no existe en el sistema.',
             'tipo_archivo.required' => 'El tipo de archivo es obligatorio.',
-            'tipo_archivo.in' => 'El tipo de archivo seleccionado no es válido.',
+            'tipo_archivo.boolean' => 'El tipo de archivo debe indicar si requiere archivo (verdadero) o no (falso).',
             'observacion.required' => 'La observación es obligatoria y debe detallar la prueba.',
             'observacion.string' => 'La observación debe ser una cadena de caracteres.',
             'archivo.required' => 'El archivo es obligatorio para el tipo de prueba seleccionado.',
