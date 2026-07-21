@@ -27,22 +27,22 @@ class UpdatePruebaRequest extends FormRequest
         $pruebaId = $this->route('prueba');
         $prueba = $pruebaId ? \App\Models\Prueba::with('archivo')->find($pruebaId) : null;
 
-        $tipo = $this->input('tipo_archivo') ?? ($prueba->tipo_archivo ?? null);
+        $tipo = $this->has('tipo_archivo') ? $this->boolean('tipo_archivo') : (bool) ($prueba->tipo_archivo ?? false);
         $removerArchivo = filter_var($this->input('remover_archivo'), FILTER_VALIDATE_BOOLEAN);
 
         $rules = [
-            'tipo_archivo' => ['nullable', 'in:imagen,pdf,video,audio,txt,texto'],
+            'tipo_archivo' => ['nullable', 'boolean'],
             'observacion' => ['nullable', 'string'],
             'remover_archivo' => ['nullable', 'boolean'],
         ];
 
-        // Si el tipo final (nuevo o existente) requiere archivo (no es 'texto')
-        if ($tipo && $tipo !== 'texto') {
+        // Si la prueba requiere archivo (tipo_archivo es true)
+        if ($tipo) {
             $tieneArchivoActual = $prueba && $prueba->archivo !== null;
             
             // El archivo es obligatorio si:
-            // 1. La prueba actualmente no tiene un archivo (ej: era tipo 'texto' y ahora pasa a ser 'pdf').
-            // 2. O el usuario pide remover el archivo actual de una prueba que sigue requiriendo archivo (pdf, imagen, etc.).
+            // 1. La prueba actualmente no tiene un archivo (ej: era tipo 'texto' y ahora requiere archivo).
+            // 2. O el usuario pide remover el archivo actual.
             // 3. O si el usuario está subiendo un archivo nuevo explícitamente en la petición.
             $debeSubirArchivo = !$tieneArchivoActual || $removerArchivo || $this->hasFile('archivo');
 
@@ -55,28 +55,11 @@ class UpdatePruebaRequest extends FormRequest
             
             $fileRules[] = 'file';
             $fileRules[] = 'max:20480';
-
-            switch ($tipo) {
-                case 'imagen':
-                    $fileRules[] = 'mimes:jpeg,jpg,png,gif,webp,svg';
-                    break;
-                case 'pdf':
-                    $fileRules[] = 'mimes:pdf';
-                    break;
-                case 'video':
-                    $fileRules[] = 'mimes:mp4,mpeg,mov,avi,quicktime';
-                    break;
-                case 'audio':
-                    $fileRules[] = 'mimes:mp3,wav,ogg,m4a,aac';
-                    break;
-                case 'txt':
-                    $fileRules[] = 'mimes:txt,text';
-                    break;
-            }
+            $fileRules[] = 'mimes:jpg,png,gif,webp,svg,pdf,mp4,mpeg,mov,avi,quicktime,mp3,wav,ogg,m4a,aac,txt,text';
 
             $rules['archivo'] = $fileRules;
-        } elseif ($tipo === 'texto') {
-            // Si el tipo es texto, se prohíbe explícitamente subir archivos
+        } else {
+            // Si no requiere archivo, se prohíbe explícitamente subir archivos
             $rules['archivo'] = ['nullable', 'prohibited'];
         }
 
@@ -91,7 +74,7 @@ class UpdatePruebaRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'tipo_archivo.in' => 'El tipo de archivo seleccionado no es válido.',
+            'tipo_archivo.boolean' => 'El tipo de archivo debe indicar si requiere archivo (verdadero) o no (falso).',
             'observacion.string' => 'La observación debe ser una cadena de caracteres.',
             'remover_archivo.boolean' => 'La opción de remover archivo debe ser un valor booleano.',
             'archivo.required' => 'El archivo es obligatorio para el tipo de prueba seleccionado.',
