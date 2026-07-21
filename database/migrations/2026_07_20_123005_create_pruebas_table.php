@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pruebas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('acta_id')->constrained('actas')->onDelete('cascade');
-            $table->string('tipo_archivo');
+            $table->boolean('tipo_archivo');
             $table->text('observacion')->nullable();
             $table->unsignedBigInteger('user_id'); // Sin foreign key física por estar en otra conexión (admin)
             $table->timestamps();
