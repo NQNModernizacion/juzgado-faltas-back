@@ -343,3 +343,48 @@ if (!function_exists('register_app_income')) {
         return true;
     }
 }
+
+if (!function_exists('consultar_persona_externo')) {
+    /**
+     * Consulta información de una persona o empresa en la API externa configurada (RENAPER, AFIP, etc.).
+     *
+     * @param string $identificacion
+     * @param string $tipo
+     * @return array
+     * @throws \DomainException|\Throwable
+     */
+    function consultar_persona_externo(string $identificacion, string $tipo = 'DNI'): array
+    {
+        $base = env('BASE_WEB_LOGIN_API2');
+        $endpoint = env('ENDPOINT_PERSONA_EXTERNO', 'persona');
+
+        if (empty($base)) {
+            throw new \DomainException('La URL base para la consulta externa (BASE_WEB_LOGIN_API2) no está configurada.');
+        }
+
+        $token = env('TOKEN_PERSONA_EXTERNO', env('TOKEN_DNRPA'));
+        if (empty($token)) {
+            throw new \DomainException('El token de autenticación para la consulta de personas no está configurado.');
+        }
+
+        $url = rtrim($base, '/') . '/' . ltrim($endpoint, '/') . '/' . $tipo . '/' . $identificacion;
+
+        try {
+            $response = Http::withoutVerifying()
+                ->timeout(60)
+                ->withToken($token)
+                ->get($url);
+
+            if ($response->failed()) {
+                $errorData = $response->json();
+                $errorMessage = $errorData['message'] ?? $errorData['error'] ?? 'Error al consultar la persona en la API externa (Código: ' . $response->status() . ').';
+                throw new \DomainException($errorMessage);
+            }
+
+            return $response->json()['value'] ?? $response->json();
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            throw new \DomainException('Error de conexión con la API externa de personas.');
+        }
+    }
+}
+
