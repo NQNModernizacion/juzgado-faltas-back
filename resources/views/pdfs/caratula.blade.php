@@ -73,11 +73,34 @@
         }
 
         .observaciones-content {
-            height: 70px;
+            height: auto;
             padding: 8px;
             font-size: 10.5pt;
             text-align: left;
             word-wrap: break-word;
+        }
+
+        /* Medidas Cautelares */
+        .cautelares-box {
+            border: 2px solid #000;
+            margin: 15px auto;
+            width: 80%;
+            padding: 8px;
+            box-sizing: border-box;
+            background-color: #fff;
+            text-align: center;
+        }
+
+        .cautelares-label {
+            font-size: 11pt;
+            font-weight: bold;
+            /* color: #d32f2f; */
+            margin-right: 5px;
+        }
+
+        .cautelares-value {
+            font-size: 11pt;
+            font-weight: bold;
         }
 
         /* Título central grande de la oficina */
@@ -137,27 +160,27 @@
 
         /* Tabla de Pie de Página */
         .bottom-table {
-            width: 80%;
-            margin: 60px auto 10px auto;
+            width: 92%;
+            margin: 25px auto 10px auto;
             border-collapse: collapse;
             border: 1px solid #000;
         }
 
         .bottom-table td {
             border: 1px solid #000;
-            padding: 12px 15px;
-            font-size: 11.5pt;
+            padding: 8px 12px;
+            font-size: 11pt;
             vertical-align: middle;
         }
 
         .left-cell {
-            width: 60%;
+            width: 65%;
             text-align: left;
             font-weight: normal;
         }
 
         .right-cell {
-            width: 40%;
+            width: 35%;
             text-align: left;
             font-weight: normal;
         }
@@ -190,6 +213,14 @@
         </div>
     </div>
 
+    @if(!empty($cautelaresText))
+        <!-- Medidas Cautelares -->
+        <div class="cautelares-box">
+            <span class="cautelares-label">MEDIDA CAUTELAR:</span>
+            <span class="cautelares-value">{{ $cautelaresText }}</span>
+        </div>
+    @endif
+
     <!-- Título Principal de la Oficina (FM1/FM2 -> FOTOMULTA) -->
     <div class="oficina-resumida-box">
         <div class="oficina-resumida-text">{{ $oficinaResumida }}</div>
@@ -199,12 +230,12 @@
     <div class="expediente-box">
         <div class="expediente-text">Expte. Nº <span style="font-size: 28pt;">{{ $acta->numero_causa }}</span></div>
         <div class="anio-text">
-            {{ $acta->fecha_labrada ? \Carbon\Carbon::parse($acta->fecha_labrada)->format('Y') : \Carbon\Carbon::now()->format('Y') }}
+            Año {{ $acta->fecha_labrada ? \Carbon\Carbon::parse($acta->fecha_labrada)->format('Y') : \Carbon\Carbon::now()->format('Y') }}
         </div>
     </div>
 
     <!-- Autos / Imputados (Tamaño adaptativo) -->
-    <div class="autos-box" style="font-size: {{ strlen($autosText) > 60 ? '14pt' : (strlen($autosText) > 30 ? '17pt' : '20pt') }};">
+    <div class="autos-box" style="font-size: {{ $autosFontSize ?? '17pt' }};">
         AUTOS: {{ $autosText ?: 'SIN IMPUTADOS' }}
     </div>
 
@@ -220,6 +251,17 @@
             <td class="left-cell">Acta de Infracción Nº: &nbsp;<strong>{{ $acta->numero_acta }}</strong></td>
             <td class="right-cell">Fecha: &nbsp;<strong>{{ $acta->fecha_labrada ? \Carbon\Carbon::parse($acta->fecha_labrada)->format('d/m/Y') : '' }}</strong></td>
         </tr>
+        @foreach($padronesFilas as $fila)
+            <tr>
+                @if($fila['tipo'] === 'vehiculo')
+                    <td class="left-cell">Marca: &nbsp;<strong>{{ $fila['marca'] }}</strong> &nbsp;&nbsp;&nbsp;&nbsp; Modelo: &nbsp;<strong>{{ $fila['modelo'] }}</strong></td>
+                    <td class="right-cell">Dominio: &nbsp;<strong>{{ $fila['dominio'] }}</strong></td>
+                @else
+                    <td class="left-cell">Dirección de la Falta: &nbsp;<strong>{{ $fila['direccion'] }}</strong></td>
+                    <td class="right-cell">DNI/CUIL/CUIT: &nbsp;<strong>{{ $fila['documento'] }}</strong></td>
+                @endif
+            </tr>
+        @endforeach
     </table>
 </div>
 
