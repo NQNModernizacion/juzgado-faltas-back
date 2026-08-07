@@ -18,8 +18,20 @@ class Infractor extends Model
         'documento',
         'identificacion',
         'nombre',
-        'domicilio'
+        'domicilio',
+        'data_cache',
+        'fecha_actualizacion',
     ];
+
+    protected $casts = [
+        'data_cache' => 'array',
+        'fecha_actualizacion' => 'datetime',
+    ];
+
+    public function tipo()
+    {
+        return $this->belongsTo(EstadosGenerales::class, 'tipo_id');
+    }
 
     public function getActivitylogOptions(): LogOptions
     {
