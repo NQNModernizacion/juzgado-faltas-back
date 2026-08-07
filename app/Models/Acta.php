@@ -218,6 +218,14 @@ class Acta extends Model
     {
         return $this->belongsTo(Juzgado::class, 'numero_juzgado_id');
     }
+    public function calle()
+    {
+        return $this->belongsTo(Calle::class, 'calle_id');
+    }
+    public function cruce()
+    {
+        return $this->belongsTo(Calle::class, 'cruce_id');
+    }
     public function juez()
     {
         return $this->belongsTo(Juez::class, 'juez_id');
