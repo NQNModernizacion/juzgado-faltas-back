@@ -15,8 +15,21 @@ class Padron extends Model
     protected $fillable = [
         'tipo_id',
         'identificacion',
-        'nombre'
+        'nombre',
+        'data_cache',
+        'fecha_actualizacion',
     ];
+
+    protected $casts = [
+        'data_cache' => 'array',
+        'fecha_actualizacion' => 'datetime',
+    ];
+
+    public function tipo()
+    {
+        return $this->belongsTo(EstadosGenerales::class, 'tipo_id');
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
