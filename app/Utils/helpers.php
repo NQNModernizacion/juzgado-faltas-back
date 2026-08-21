@@ -246,3 +246,16 @@ if (!function_exists('get_file')) {
         }
     }
 }
+if (!function_exists('register_app_income')) {
+    function register_app_income($userID, $appName)
+    {
+        $url = env('BASE_ADMIN_URL') . 'api/ingreso_aplicacion';
+
+        $response = (object) Http::withoutVerifying()->post($url, [
+            'user_id' => $userID,
+            'app_name' => $appName,
+        ])->json();
+
+        return true;
+    }
+}

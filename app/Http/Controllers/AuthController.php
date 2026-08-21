@@ -65,7 +65,7 @@ class AuthController extends Controller
 
             $token = $user->createToken($deviceName)->plainTextToken;
             if ($request->type != 'internal') {
-                register_app_income(Auth::user()->id, $request);
+                register_app_income(Auth::id(), env('APP_NAME'));
             }
             return sendResponse([
                 'token_type' => 'Bearer',
