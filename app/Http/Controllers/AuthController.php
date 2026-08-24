@@ -64,7 +64,7 @@ class AuthController extends Controller
                 ?? substr(($request->userAgent() ?: 'api-device'), 0, 255);
 
             $token = $user->createToken($deviceName)->plainTextToken;
-            if ($request->type != 'internal') {
+            if ($request->type == 'internal') {
                 register_app_income(Auth::id(), env('APP_NAME'));
             }
             return sendResponse([
