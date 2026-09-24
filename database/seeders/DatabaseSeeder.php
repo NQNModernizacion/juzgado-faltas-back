@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             OficinasInternasSeeder::class,
             InfraccionSeeder::class,
             EstadosProcesalesSeeder::class,
+            PlantillaDocumentoSeeder::class,
         ]);
         // User::factory(10)->create();
 

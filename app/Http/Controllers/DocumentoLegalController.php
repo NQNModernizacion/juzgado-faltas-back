@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreDocumentoLegalRequest;
+use App\Http\Resources\DocumentoLegalResource;
 use App\Models\Acta;
 use App\Services\DocumentoLegalService;
 use App\Models\DocumentoLegal;
+use App\Models\PlantillaDocumento;
 use DomainException;
 use Throwable;
 
@@ -22,8 +24,56 @@ class DocumentoLegalController extends Controller
     public function index()
     {
         try {
-            $documentos = DocumentoLegal::all();
-            return sendResponse($documentos);
+            $documentos = DocumentoLegal::with('plantilla')->get();
+            return sendResponse(DocumentoLegalResource::collection($documentos));
+        } catch (Throwable $th) {
+            return error_response($th);
+        }
+    }
+
+    /**
+     * Obtiene todos los documentos/formularios legales cargados para un acta.
+     */
+    public function getByActa(string $actaId)
+    {
+        try {
+            $acta = Acta::findOrFail($actaId);
+            $documentos = DocumentoLegal::with('plantilla')
+                ->where('acta_id', $acta->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return sendResponse(DocumentoLegalResource::collection($documentos));
+        } catch (DomainException $e) {
+            return sendResponse(null, ['general' => $e->getMessage()], 422);
+        } catch (Throwable $th) {
+            return error_response($th);
+        }
+    }
+
+    /**
+     * Precarga la plantilla con los datos del acta para el editor WYSIWYG.
+     */
+    public function precargar(string $actaId, string $plantillaId)
+    {
+        try {
+            $acta = Acta::findOrFail($actaId);
+            $plantilla = is_numeric($plantillaId)
+                ? PlantillaDocumento::findOrFail($plantillaId)
+                : PlantillaDocumento::where('codigo', $plantillaId)->firstOrFail();
+
+            $html = $this->service->generarHtmlPrecarga($acta, $plantilla);
+
+            return sendResponse([
+                'acta_id' => $acta->id,
+                'plantilla_id' => $plantilla->id,
+                'plantilla_codigo' => $plantilla->codigo,
+                'plantilla_nombre' => $plantilla->nombre,
+                'tipo' => $plantilla->codigo,
+                'contenido_html' => $html,
+            ]);
+        } catch (DomainException $e) {
+            return sendResponse(null, ['general' => $e->getMessage()], 422);
         } catch (Throwable $th) {
             return error_response($th);
         }
@@ -33,7 +83,8 @@ class DocumentoLegalController extends Controller
     {
         try {
             $documento = $this->service->crearDocumento($request->validated());
-            return sendResponse($documento);
+            $documento->load('plantilla');
+            return sendResponse(new DocumentoLegalResource($documento));
         } catch (DomainException $e) {
             return sendResponse(null, ['general' => $e->getMessage()], 422);
         } catch (Throwable $th) {
@@ -66,8 +117,8 @@ class DocumentoLegalController extends Controller
     public function show(string $id)
     {
         try {
-            $documento = DocumentoLegal::findOrFail($id);
-            return sendResponse($documento);
+            $documento = DocumentoLegal::with('plantilla')->findOrFail($id);
+            return sendResponse(new DocumentoLegalResource($documento));
         } catch (Throwable $th) {
             return error_response($th);
         }
@@ -76,10 +127,10 @@ class DocumentoLegalController extends Controller
     public function update(StoreDocumentoLegalRequest $request, string $id)
     {
         try {
-            // Lógica basica de update
             $documento = DocumentoLegal::findOrFail($id);
             $documento->update($request->validated());
-            return sendResponse($documento);
+            $documento->load('plantilla');
+            return sendResponse(new DocumentoLegalResource($documento));
         } catch (DomainException $e) {
             return sendResponse(null, ['general' => $e->getMessage()], 422);
         } catch (Throwable $th) {

@@ -4,6 +4,9 @@ namespace App\Services;
 
 use App\Models\DocumentoLegal;
 use App\Models\Causa;
+use App\Models\Acta;
+use App\Models\PlantillaDocumento;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Spatie\LaravelPdf\Facades\Pdf;
 
@@ -170,5 +173,33 @@ class DocumentoLegalService
         ])
             ->format('a4')
             ->margins(15, 15, 15, 15);
+    }
+
+    /**
+     * Genera el HTML precargado completo para el editor WYSIWYG del frontend utilizando vistas Blade nativas.
+     */
+    public function generarHtmlPrecarga(Acta $acta, PlantillaDocumento $plantilla): string
+    {
+        $acta->loadMissing([
+            'juzgado', 'juez', 'secretaria', 'juezSubrogante', 'secretariaSubrogante',
+            'oficina', 'calle', 'cruce', 'inspector1', 'inspector2',
+            'cautelares', 'padrones.tipo', 'infractores', 'infracciones',
+            'movimientos.oficinaOrigen', 'movimientos.oficinaDestino',
+            'estadosProcesales'
+        ]);
+
+        $vista = view()->exists("formularios.plantillas.{$plantilla->codigo}")
+            ? "formularios.plantillas.{$plantilla->codigo}"
+            : "formularios.plantillas.default";
+
+        $fechaActual = Carbon::now()->locale('es');
+        $imputado = $acta->infractores->first();
+
+        return view($vista, [
+            'acta' => $acta,
+            'plantilla' => $plantilla,
+            'imputado' => $imputado,
+            'fechaActual' => $fechaActual,
+        ])->render();
     }
 }

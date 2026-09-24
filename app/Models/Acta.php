@@ -262,4 +262,9 @@ class Acta extends Model
     {
         return $this->hasMany(Prueba::class, 'acta_id');
     }
+
+    public function documentosLegales()
+    {
+        return $this->hasMany(DocumentoLegal::class, 'acta_id');
+    }
 }

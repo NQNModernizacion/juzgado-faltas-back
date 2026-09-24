@@ -86,7 +86,11 @@ Route::get('actas/{id}/estados_procesales', [EstadoProcesalController::class, 'o
 Route::get('consultar_padron', [PadronController::class, 'consultar']);
 Route::get('consultar_imputado', [InfractorController::class, 'consultarImputado']);
 
-// Rutas de Documentos Legales
+// Rutas de Documentos Legales y Formularios por Acta
+Route::get('actas/{id}/formularios', [DocumentoLegalController::class, 'getByActa']);
+Route::get('actas/{id}/documentos', [DocumentoLegalController::class, 'getByActa']);
+Route::get('actas/{id}/formularios/precargar/{plantilla}', [DocumentoLegalController::class, 'precargar']);
+Route::post('actas/{id}/formularios', [DocumentoLegalController::class, 'store']);
 Route::apiResource('documentos', DocumentoLegalController::class);
 Route::get('documentos/{id}/pdf', [DocumentoLegalController::class, 'generarPdf']);
 
