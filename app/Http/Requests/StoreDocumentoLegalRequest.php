@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Http\Requests\Traits\TraitRequest;
+use App\Models\DocumentoLegal;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -21,6 +22,13 @@ class StoreDocumentoLegalRequest extends FormRequest
             $this->merge([
                 'acta_id' => $this->route('id')
             ]);
+        } elseif ($this->route('documento') && !$this->has('acta_id')) {
+            $doc = DocumentoLegal::find($this->route('documento'));
+            if ($doc) {
+                $this->merge([
+                    'acta_id' => $doc->acta_id
+                ]);
+            }
         }
     }
 
