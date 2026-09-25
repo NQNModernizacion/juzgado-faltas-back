@@ -38,7 +38,7 @@ class DocumentoLegalController extends Controller
     {
         try {
             $acta = Acta::findOrFail($actaId);
-            $documentos = DocumentoLegal::with('plantilla')
+            $documentos = DocumentoLegal::with(['plantilla', 'acta.juzgado'])
                 ->where('acta_id', $acta->id)
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -95,15 +95,16 @@ class DocumentoLegalController extends Controller
     public function generarPdf($id)
     {
         try {
-            $documento = DocumentoLegal::findOrFail($id);
+            $documento = DocumentoLegal::with(['plantilla', 'acta.juzgado'])->findOrFail($id);
             $pdf = $this->service->generarPdfSpatie($documento);
+            $fileName = $this->service->generarNombreArchivo($documento);
 
             $base64 = $pdf->base64();
             $size = (int) (strlen($base64) * 3 / 4) - (substr($base64, -2) === '==' ? 2 : (substr($base64, -1) === '=' ? 1 : 0));
 
             return sendResponse([
                 'type' => 'pdf',
-                'file_name' => "documento_{$documento->id}.pdf",
+                'file_name' => $fileName,
                 'size' => $size,
                 'file' => 'data:application/pdf;base64,' . $base64
             ]);

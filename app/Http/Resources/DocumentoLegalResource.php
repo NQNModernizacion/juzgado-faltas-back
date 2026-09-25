@@ -20,6 +20,7 @@ class DocumentoLegalResource extends JsonResource
             'causa_id' => $this->causa_id,
             'plantilla_documento_id' => $this->plantilla_documento_id,
             'tipo' => $this->tipo,
+            'file_name' => app(\App\Services\DocumentoLegalService::class)->generarNombreArchivo($this->resource),
             'contenido_html' => $this->contenido_html,
             'metadata' => $this->metadata,
             'created_at' => $this->created_at?->toDateTimeString(),

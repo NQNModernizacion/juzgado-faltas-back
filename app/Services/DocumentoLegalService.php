@@ -8,6 +8,7 @@ use App\Models\Acta;
 use App\Models\PlantillaDocumento;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Spatie\LaravelPdf\Facades\Pdf;
 
 class DocumentoLegalService
@@ -47,6 +48,34 @@ class DocumentoLegalService
             ->headerHtml($headerHtml)
             ->footerHtml($footerHtml)
             ->margins(30, 20, 30, 20); // Márgenes: top, right, bottom, left en milimetros
+    }
+
+    /**
+     * Genera el nombre de archivo estandarizado con la nomenclatura judicial:
+     * {plantilla}_{nro_juzgado}-{año}-{numero_causa}.pdf
+     */
+    public function generarNombreArchivo(DocumentoLegal $documento): string
+    {
+        $documento->loadMissing(['plantilla', 'acta.juzgado']);
+
+        $tipo = Str::slug($documento->plantilla?->codigo ?? $documento->tipo ?? 'documento', '_');
+
+        $acta = $documento->acta;
+        $juzgadoNro = $acta?->juzgado?->numero_juzgado
+            ?? $acta?->numero_juzgado_id
+            ?? ($documento->metadata['juzgado_nro'] ?? null)
+            ?? '1';
+
+        $anio = $acta?->fecha_labrada
+            ? Carbon::parse($acta->fecha_labrada)->format('Y')
+            : ($acta?->year ?? ($documento->metadata['causa_anio'] ?? null) ?? Carbon::now()->year);
+
+        $causaNro = $acta?->numero_causa
+            ?? ($documento->metadata['causa_nro'] ?? null)
+            ?? $acta?->id
+            ?? $documento->id;
+
+        return "{$tipo}_{$juzgadoNro}-{$anio}-{$causaNro}.pdf";
     }
 
     public function crearCaratula($acta)
