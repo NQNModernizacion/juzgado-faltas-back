@@ -28,3 +28,23 @@ php artisan make:sub-table --model=NuevoModelo --name=nueva_tabla --labels="Opci
 - Prohibido usar a `TABLES` para hacer relaciones. Sustituir los Models que se extendienden de `TABLES` (es decir, que son creados a partir del comando anterior).
 - **ATENCIÓN:** **[php ... --model=X --name=Y ...]** la combinacion X e Y no debe existir en la BD.
 
+---
+
+# 🔍 Consultas de Padrones e Imputados (Caché y Resiliencia)
+
+El sistema cuenta con un mecanismo de consulta optimizado para las rutas `/api/consultar_padron` y `/api/consultar_imputado`:
+
+### 1. Búsqueda de Imputados (`/api/consultar_imputado`)
+- **Prioridad Interna (`PersonasAdmin`):** Si la persona física existe en nuestra base de datos de administración (`admin.Personas`), los datos se retornan directamente de allí **sin guardarse en caché (`data_cache`)**, manteniendo la consulta limpia y ligera.
+- **Consultas a APIs Externas (RENAPER, AFIP, Empresas):** Si no se encuentra en `PersonasAdmin` o se trata de una empresa/CUIT:
+  - Se verifica si existe una búsqueda externa en la tabla local `infractores` con menos de 30 días de antigüedad (`CACHE_PADRON_DIAS`).
+  - Si la caché es válida, se sirve directamente del campo JSON `data_cache`.
+  - Si expiró o no existe, se invoca la API externa (mediante `consultar_persona_externo`) y se guarda/actualiza en `infractores` con `fecha_actualizacion = now()`.
+  - **Tolerancia a fallos:** Si la API externa falla pero existe una caché previa expirada, se devuelve la caché local registrando una advertencia en logs.
+
+### 2. Búsqueda de Padrones (`/api/consultar_padron`)
+- Mismo esquema TTL de 30 días (`CACHE_PADRON_DIAS`).
+- Para patentes de vehículos (`AUT` / `MOT`), consulta a la DNRPA vía `consultar_aut_externo` y almacena los datos completos en `data_cache` de la tabla `padrones`.
+- Al generar la carátula de expediente, la información del vehículo (marca, modelo, dominio) o del inmueble/comercio/zoonosis (dirección e identificación del padrón o CUIT/DNI) se sirve leyendo esta caché local de forma instantánea.
+
+
