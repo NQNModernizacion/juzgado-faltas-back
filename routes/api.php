@@ -90,7 +90,9 @@ Route::get('consultar_imputado', [InfractorController::class, 'consultarImputado
 Route::get('actas/{id}/formularios', [DocumentoLegalController::class, 'getByActa']);
 Route::get('actas/{id}/documentos', [DocumentoLegalController::class, 'getByActa']);
 Route::get('actas/{id}/formularios/precargar/{plantilla}', [DocumentoLegalController::class, 'precargar']);
+Route::get('actas/{id}/formularios/reemitir/{documento}', [DocumentoLegalController::class, 'reemitir']);
 Route::post('actas/{id}/formularios', [DocumentoLegalController::class, 'store']);
+Route::post('documentos/{id}/anular', [DocumentoLegalController::class, 'anular']);
 Route::apiResource('documentos', DocumentoLegalController::class);
 Route::get('documentos/{id}/pdf', [DocumentoLegalController::class, 'generarPdf']);
 
