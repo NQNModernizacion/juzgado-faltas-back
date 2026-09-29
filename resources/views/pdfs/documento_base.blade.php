@@ -56,6 +56,21 @@
     </style>
 </head>
 <body>
+    @if(($documento->estado ?? 'activo') === 'anulado')
+        <div style="background-color: #fee2e2; border: 2px dashed #dc2626; color: #991b1b; padding: 10px; margin-bottom: 20px; text-align: center; font-family: Arial, sans-serif;">
+            <strong style="font-size: 13pt; letter-spacing: 1px;">*** DOCUMENTO ANULADO - SIN VALIDEZ LEGAL NI PROCESAL ***</strong>
+            @if(!empty($documento->motivo_anulacion))
+                <div style="font-size: 9.5pt; margin-top: 4px; color: #7f1d1d;">Motivo de anulación: {{ $documento->motivo_anulacion }}</div>
+            @endif
+        </div>
+    @elseif(($documento->estado ?? 'activo') === 'reemplazado')
+        <div style="background-color: #f3f4f6; border: 2px dashed #4b5563; color: #1f2937; padding: 10px; margin-bottom: 20px; text-align: center; font-family: Arial, sans-serif;">
+            <strong style="font-size: 12pt; letter-spacing: 1px;">*** DOCUMENTO HISTÓRICO - SUPERADO Y REEMPLAZADO ***</strong>
+            <div style="font-size: 9.5pt; margin-top: 4px; color: #4b5563;">
+                Este documento fue sustituido por el Documento #{{ $documento->documentoReemplazante?->id ?? 'POSTERIOR' }} y no posee vigencia procesal activa.
+            </div>
+        </div>
+    @endif
     <div class="contenido-dinamico">
         {!! $documento->contenido_html !!}
     </div>
