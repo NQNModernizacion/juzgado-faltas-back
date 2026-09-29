@@ -22,7 +22,7 @@
                 @endphp
                 <tr>
                     <td style="border: 1px solid #ccc; padding: 5px 6px;">{{ $fecha }}</td>
-                    <td style="border: 1px solid #ccc; padding: 5px 6px;"><strong>{{ $ep->nombre ?? '-' }}</strong></td>
+                    <td style="border: 1px solid #ccc; padding: 5px 6px;"><strong>{{ $ep->descripcion ?? '-' }}</strong></td>
                     <td style="border: 1px solid #ccc; padding: 5px 6px;">{{ $ep->pivot->observacion ?? '-' }}</td>
                 </tr>
             @empty
