@@ -30,6 +30,41 @@ class DocumentoLegalService
                 }
             }
 
+            // GESTIÓN DE REEMPLAZO AUTOMÁTICO:
+            // Si viene un documento_reemplazado_id explícito, marcar ese documento como 'reemplazado'.
+            // Si no viene, pero ya existen documentos activos para este acta y tipo, encontrar el anterior activo,
+            // enlazarlo como documento_reemplazado_id y marcar los anteriores como 'reemplazado'.
+            $tipo = $data['tipo'] ?? null;
+            $reemplazadoId = $data['documento_reemplazado_id'] ?? null;
+
+            if ($actaId && $tipo) {
+                if ($reemplazadoId) {
+                    DocumentoLegal::where('id', $reemplazadoId)
+                        ->where('acta_id', $actaId)
+                        ->update(['estado' => 'reemplazado']);
+                } else {
+                    $docAnteriorActivo = DocumentoLegal::where('acta_id', $actaId)
+                        ->where('tipo', $tipo)
+                        ->where('estado', 'activo')
+                        ->latest('id')
+                        ->first();
+
+                    if ($docAnteriorActivo) {
+                        $data['documento_reemplazado_id'] = $docAnteriorActivo->id;
+                        $docAnteriorActivo->update(['estado' => 'reemplazado']);
+                    }
+                }
+
+                // Garantizar que ningún otro documento previo del mismo tipo quede como 'activo'
+                if (!empty($data['documento_reemplazado_id'])) {
+                    DocumentoLegal::where('acta_id', $actaId)
+                        ->where('tipo', $tipo)
+                        ->where('estado', 'activo')
+                        ->where('id', '!=', $data['documento_reemplazado_id'])
+                        ->update(['estado' => 'reemplazado']);
+                }
+            }
+
             $documento = DocumentoLegal::create($data);
             return $documento;
         });
@@ -230,5 +265,57 @@ class DocumentoLegalService
             'imputado' => $imputado,
             'fechaActual' => $fechaActual,
         ])->render();
+    }
+
+    /**
+     * Fusiona los datos vigentes del expediente con el texto previamente redactado en un documento anterior.
+     */
+    public function reemitirConDatosActuales(DocumentoLegal $docPrevio): array
+    {
+        $docPrevio->loadMissing(['acta', 'plantilla']);
+        $acta = $docPrevio->acta;
+        $plantilla = $docPrevio->plantilla;
+
+        if (!$acta) {
+            throw new \DomainException('No se encontró el acta asociada al documento.');
+        }
+
+        if (!$plantilla) {
+            $plantilla = PlantillaDocumento::where('codigo', $docPrevio->tipo)->first();
+            if (!$plantilla) {
+                throw new \DomainException('No se encontró la plantilla para reemitir este documento.');
+            }
+        }
+
+        // 1. Generar HTML fresco con los datos y movimientos vigentes del acta
+        $htmlFresco = $this->generarHtmlPrecarga($acta, $plantilla);
+
+        // 2. Extraer el cuerpo redactado del documento anterior
+        $htmlAnterior = $docPrevio->contenido_html;
+        $cuerpoRedactado = null;
+
+        if (preg_match('/<div[^>]*class=["\'][^"\']*cuerpo-formulario-editable[^"\']*["\'][^>]*>(.*?)<\/div>\s*$/s', $htmlAnterior, $matches)) {
+            $cuerpoRedactado = $matches[1];
+        }
+
+        // 3. Reemplazar en el HTML fresco el cuerpo redactado
+        $htmlFusionado = $htmlFresco;
+        if ($cuerpoRedactado !== null) {
+            $htmlFusionado = preg_replace(
+                '/(<div[^>]*class=["\'][^"\']*cuerpo-formulario-editable[^"\']*["\'][^>]*>)(.*?)(<\/div>\s*$)/s',
+                '${1}' . $cuerpoRedactado . '${3}',
+                $htmlFresco
+            );
+        }
+
+        return [
+            'acta_id' => $acta->id,
+            'plantilla_id' => $plantilla->id,
+            'plantilla_codigo' => $plantilla->codigo,
+            'plantilla_nombre' => $plantilla->nombre,
+            'tipo' => $plantilla->codigo,
+            'documento_reemplazado_id' => $docPrevio->id,
+            'contenido_html' => $htmlFusionado,
+        ];
     }
 }
