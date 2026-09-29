@@ -38,7 +38,7 @@ class DocumentoLegalController extends Controller
     {
         try {
             $acta = Acta::findOrFail($actaId);
-            $documentos = DocumentoLegal::with(['plantilla', 'acta.juzgado'])
+            $documentos = DocumentoLegal::with(['plantilla', 'acta.juzgado', 'documentoReemplazante'])
                 ->where('acta_id', $acta->id)
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -145,6 +145,48 @@ class DocumentoLegalController extends Controller
             $documento = DocumentoLegal::findOrFail($id);
             $documento->delete();
             return sendResponse(['message' => 'Eliminado con éxito']);
+        } catch (Throwable $th) {
+            return error_response($th);
+        }
+    }
+
+    /**
+     * Anula un documento legal emitido registrando el motivo formal.
+     */
+    public function anular(Request $request, string $id)
+    {
+        try {
+            $request->validate([
+                'motivo' => 'required|string|max:500',
+            ]);
+
+            $documento = DocumentoLegal::findOrFail($id);
+            $documento->update([
+                'estado' => 'anulado',
+                'motivo_anulacion' => $request->input('motivo'),
+            ]);
+
+            $documento->load(['plantilla', 'acta.juzgado']);
+            return sendResponse(new DocumentoLegalResource($documento));
+        } catch (DomainException $e) {
+            return sendResponse(null, ['general' => $e->getMessage()], 422);
+        } catch (Throwable $th) {
+            return error_response($th);
+        }
+    }
+
+    /**
+     * Reemite un documento combinando datos y movimientos actuales del acta con el texto redactado del previo.
+     */
+    public function reemitir(string $actaId, string $documentoId)
+    {
+        try {
+            $documento = DocumentoLegal::findOrFail($documentoId);
+            $datosReemision = $this->service->reemitirConDatosActuales($documento);
+
+            return sendResponse($datosReemision);
+        } catch (DomainException $e) {
+            return sendResponse(null, ['general' => $e->getMessage()], 422);
         } catch (Throwable $th) {
             return error_response($th);
         }
