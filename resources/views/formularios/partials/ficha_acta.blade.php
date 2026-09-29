@@ -11,9 +11,9 @@
         $juezNombre .= ' (Subrogante: ' . $acta->juezSubrogante->nombre . ')';
     }
 
-    $secNombre = $acta->secretaria->nombre ?? '-';
+    $secNombre = $acta->secretaria->descripcion ?? '-';
     if ($acta->secretariaSubrogante) {
-        $secNombre .= ' (Subrogante: ' . $acta->secretariaSubrogante->nombre . ')';
+        $secNombre .= ' (Subrogante: ' . $acta->secretariaSubrogante->descripcion . ')';
     }
 
     $inspList = array_filter([$acta->inspector1->nombre ?? null, $acta->inspector2->nombre ?? null]);
@@ -49,9 +49,9 @@
 
     $infraccionesDesc = $acta->infracciones->map(function ($inf) {
         $art = $inf->articulo ? 'Art. ' . $inf->articulo : '';
-        $inc = $inf->inciso ? ' Inc. ' . $inf->inciso : '';
+        // $inc = $inf->inciso ? ' Inc. ' . $inf->inciso : '';
         $desc = $inf->descripcion ? ' - ' . $inf->descripcion : '';
-        return trim($art . $inc . $desc);
+        return trim($art /* . $inc */ . $desc);
     })->filter()->implode(' ; ') ?: '-';
 
     $padronesDesc = $acta->padrones->map(function ($padron) {
