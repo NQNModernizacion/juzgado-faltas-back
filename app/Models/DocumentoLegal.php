@@ -18,6 +18,9 @@ class DocumentoLegal extends Model
         'causa_id',
         'acta_id',
         'tipo',
+        'estado',
+        'motivo_anulacion',
+        'documento_reemplazado_id',
         'contenido_html',
         'metadata',
     ];
@@ -39,6 +42,45 @@ class DocumentoLegal extends Model
     public function acta()
     {
         return $this->belongsTo(Acta::class, 'acta_id');
+    }
+
+    public function documentoReemplazado()
+    {
+        return $this->belongsTo(DocumentoLegal::class, 'documento_reemplazado_id');
+    }
+
+    public function documentoReemplazante()
+    {
+        return $this->hasOne(DocumentoLegal::class, 'documento_reemplazado_id');
+    }
+
+    public function calcularDesactualizado(): array
+    {
+        if (!$this->acta_id || !$this->created_at || ($this->estado ?? 'activo') !== 'activo') {
+            return [
+                'desactualizado' => false,
+                'cant_movimientos_posteriores' => 0,
+                'cant_estados_posteriores' => 0,
+            ];
+        }
+
+        $movimientosPosteriores = Movimiento::where('acta_id', $this->acta_id)
+            ->where(function ($q) {
+                $q->where('created_at', '>', $this->created_at)
+                  ->orWhere('fecha_movimiento', '>', $this->created_at);
+            })
+            ->count();
+
+        $estadosPosteriores = \Illuminate\Support\Facades\DB::table('acta_estado_procesal')
+            ->where('acta_id', $this->acta_id)
+            ->where('created_at', '>', $this->created_at)
+            ->count();
+
+        return [
+            'desactualizado' => ($movimientosPosteriores > 0 || $estadosPosteriores > 0),
+            'cant_movimientos_posteriores' => $movimientosPosteriores,
+            'cant_estados_posteriores' => $estadosPosteriores,
+        ];
     }
 
     public function getCausaIdAttribute()
